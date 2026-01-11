@@ -1,52 +1,56 @@
-// ------------------------------------
-// NEUROVEIL — Phase 1 Core (stable)
-// No imports. No fetch. GitHub Pages safe.
-// ------------------------------------
+// ----------------------------------------------------
+// NEUROVEIL • Phase 1 (GitHub Pages safe)
+// No imports. No fetch. Dark-mode cinematic UI.
+// ----------------------------------------------------
 
-// helpers
 const $ = (id) => document.getElementById(id);
-const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const pad2 = (n) => String(n).padStart(2, "0");
-const formatMMSS = (totalSeconds) => `${pad2(Math.floor(totalSeconds/60))}:${pad2(totalSeconds%60)}`;
+const formatMMSS = (s) => `${pad2(Math.floor(s/60))}:${pad2(s%60)}`;
 
-// UI refs
 const ui = {
-  nodeTitle: $("nodeTitle"),
-  nodeMeta: $("nodeMeta"),
-  nodeBody: $("nodeBody"),
-  choices: $("choices"),
-  log: $("log"),
+  hudStability: $("hudStability"),
+  hudScore: $("hudScore"),
+  hudTimer: $("hudTimer"),
+  soundBtn: $("soundBtn"),
 
-  stabilityChip: $("stabilityChip"),
-  scoreChip: $("scoreChip"),
-  timerChip: $("timerChip"),
+  sceneKicker: $("sceneKicker"),
+  sceneTitle: $("sceneTitle"),
+  sceneMeta: $("sceneMeta"),
+  sceneText: $("sceneText"),
+  choiceRow: $("choiceRow"),
 
-  startSessionBtn: $("startSessionBtn"),
+  logBox: $("logBox"),
+
+  startBtn: $("startBtn"),
   pauseBtn: $("pauseBtn"),
   resetBtn: $("resetBtn"),
   minutesSelect: $("minutesSelect"),
 
+  termList: $("termList"),
+
   quizPanel: $("quizPanel"),
-  quizQuestion: $("quizQuestion"),
-  quizOptions: $("quizOptions"),
-  quizSubmitBtn: $("quizSubmitBtn"),
-  quizProgress: $("quizProgress"),
+  quizConcept: $("quizConcept"),
   quizMeta: $("quizMeta"),
+  quizQ: $("quizQ"),
+  quizOpts: $("quizOpts"),
+  quizProgress: $("quizProgress"),
+  submitBtn: $("submitBtn"),
 };
 
-// Save (JSON only)
 const SAVE_KEY = "neuroveil_phase1_save";
 
 function loadSave(){
   try{
     const raw = localStorage.getItem(SAVE_KEY);
     if(!raw) return null;
-    const obj = JSON.parse(raw);
+    const s = JSON.parse(raw);
     return {
-      nodeId: obj.nodeId || "boot",
-      stability: typeof obj.stability === "number" ? obj.stability : 50,
-      lastScore: typeof obj.lastScore === "number" ? obj.lastScore : null,
-      missed: Array.isArray(obj.missed) ? obj.missed : []
+      nodeId: s.nodeId || "boot",
+      stability: typeof s.stability === "number" ? s.stability : 50,
+      lastScore: typeof s.lastScore === "number" ? s.lastScore : null,
+      missed: Array.isArray(s.missed) ? s.missed : [],
+      soundOn: !!s.soundOn
     };
   }catch{
     return null;
@@ -57,333 +61,323 @@ function saveNow(){
   localStorage.setItem(SAVE_KEY, JSON.stringify(state.save));
 }
 
-// Story (Phase 1 intro)
-const STORY = {
-  boot: {
-    title: "Boot Sequence • The Veil Reactivates",
-    meta: "Sector: A0 • Consciousness Research Node",
-    body:
-`The chamber is black glass and humming circuitry.
-Teal glyphs float like dust caught in a projector beam.
-
-You are the consciousness researcher assigned to NEUROVEIL —
-a system built to stabilize memory by training the nervous system through cycles.
-
-The console speaks:
-“Begin session. Calibrate limbic and hippocampal channels.”`,
-    choices: [
-      { text: "Begin calibration (recommended)", go: "calibration" },
-      { text: "Inspect the neural interface", go: "interface" },
-    ]
-  },
-
-  interface: {
-    title: "Interface Inspection • Synaptic Lattice",
-    meta: "Sector: A0 • Hardware Bay",
-    body:
-`The lattice vibrates with a familiar language: neurotransmission.
-A note from your predecessor flickers into view:
-
-“Attention is fuel. Recall is the map.
-We train in cycles: focus → test → encode → score.”`,
-    choices: [
-      { text: "Return to console", go: "boot" },
-      { text: "Start calibration now", go: "calibration" },
-    ]
-  },
-
-  calibration: {
-    title: "Calibration • Limbic Gate Online",
-    meta: "Sector: A1 • Study Loop",
-    body:
-`Protocol:
-When a Pomodoro session starts → NEUROVEIL tests your knowledge.
-When the timer ends → NEUROVEIL scores your accuracy.
-
-Phase 1 targets:
-AMYGDALA & HIPPOCAMPUS.`,
-    choices: [
-      { text: "Start Session (Pomodoro + Knowledge Check)", action: "startSession" },
-      { text: "Run a 5-minute test cycle", action: "set5andStart" },
-    ]
-  },
-};
-
-// Quiz bank (Phase 1: Amygdala + Hippocampus)
-const QUESTION_SETS = [
-  {
-    id: "amygdala_1",
-    concept: "Amygdala",
-    q: "What is the primary role of the amygdala?",
-    opts: [
-      "Coordinating balance and fine motor movement",
-      "Threat detection and fear-related processing",
-      "Transmitting signals from spinal cord to muscles",
-      "Regulating blood glucose"
-    ],
-    answer: 1,
-    teach: "Amygdala = threat detection + fear processing. It helps trigger fight-or-flight responses."
-  },
-  {
-    id: "hippocampus_1",
-    concept: "Hippocampus",
-    q: "Which function is most associated with the hippocampus?",
-    opts: [
-      "Forming new long-term (episodic/spatial) memories",
-      "Controlling reflexes in the spinal cord",
-      "Regulating heart rate directly",
-      "Producing dopamine"
-    ],
-    answer: 0,
-    teach: "Hippocampus = forming new long-term memories (especially episodic/spatial). Damage → difficulty creating new memories."
-  },
-  {
-    id: "amygdala_2",
-    concept: "Amygdala",
-    q: "Why might amygdala activation influence memory?",
-    opts: [
-      "It labels events as emotionally significant",
-      "It prevents neurons from firing",
-      "It shuts down sensory input entirely",
-      "It produces myelin"
-    ],
-    answer: 0,
-    teach: "Emotion boosts encoding. The amygdala flags significance, which can strengthen memory formation."
-  },
-  {
-    id: "hippocampus_2",
-    concept: "Hippocampus",
-    q: "A classic symptom of hippocampal damage is:",
-    opts: [
-      "Loss of hearing",
-      "Inability to form new memories (anterograde amnesia)",
-      "Loss of reflexes",
-      "Total loss of language"
-    ],
-    answer: 1,
-    teach: "Hippocampal damage often causes anterograde amnesia: trouble forming new memories."
-  },
-  {
-    id: "mix_1",
-    concept: "Amygdala & Hippocampus",
-    q: "Which pairing best matches function?",
-    opts: [
-      "Amygdala = balance; Hippocampus = reflexes",
-      "Amygdala = emotion/threat; Hippocampus = memory formation",
-      "Amygdala = blood pressure; Hippocampus = digestion",
-      "Amygdala = vision; Hippocampus = hearing"
-    ],
-    answer: 1,
-    teach: "Amygdala → emotion/threat. Hippocampus → forming new long-term memories."
-  }
-];
-
-// State
 const state = {
-  save: loadSave() || { nodeId: "boot", stability: 50, lastScore: null, missed: [] },
+  save: loadSave() || { nodeId:"boot", stability:50, lastScore:null, missed:[], soundOn:false },
 
-  timer: {
-    totalSeconds: 25 * 60,
-    remaining: 25 * 60,
-    running: false,
-    interval: null
-  },
+  timer: { total: 25*60, remaining: 25*60, running:false, handle:null },
 
-  quiz: {
-    active: false,
-    questions: [],
-    idx: 0,
-    selected: null,
-    answers: []
-  }
+  quiz: { active:false, questions:[], idx:0, selected:null, answers:[] }
 };
 
 function logLine(text, cls="sys"){
   const div = document.createElement("div");
   div.className = cls;
   div.textContent = text;
-  ui.log.appendChild(div);
-  ui.log.scrollTop = ui.log.scrollHeight;
+  ui.logBox.appendChild(div);
+  ui.logBox.scrollTop = ui.logBox.scrollHeight;
 }
 
-function setStability(val){
-  state.save.stability = clamp(val, 0, 100);
-  ui.stabilityChip.textContent = `Stability: ${state.save.stability}`;
+function setStability(v){
+  state.save.stability = clamp(v, 0, 100);
+  ui.hudStability.textContent = `STABILITY ${pad2(state.save.stability)}`;
   saveNow();
 }
 
-function setScore(val){
-  state.save.lastScore = val;
-  ui.scoreChip.textContent = `Score: ${val}%`;
+function setScore(v){
+  state.save.lastScore = v;
+  ui.hudScore.textContent = `SCORE ${v}%`;
   saveNow();
-}
-
-function renderNode(nodeId){
-  const node = STORY[nodeId];
-  if(!node){
-    ui.nodeTitle.textContent = "ERROR: Missing node";
-    ui.nodeBody.textContent = `Node '${nodeId}' not found.`;
-    ui.choices.innerHTML = "";
-    return;
-  }
-
-  state.save.nodeId = nodeId;
-  saveNow();
-
-  ui.nodeTitle.textContent = node.title;
-  ui.nodeMeta.textContent = node.meta;
-  ui.nodeBody.textContent = node.body;
-
-  ui.choices.innerHTML = "";
-  node.choices.forEach((c) => {
-    const btn = document.createElement("button");
-    btn.className = "choiceBtn";
-    btn.textContent = c.text;
-
-    btn.onclick = () => {
-      if(c.go) return renderNode(c.go);
-      if(c.action === "startSession") return startSession();
-      if(c.action === "set5andStart"){
-        ui.minutesSelect.value = "5";
-        applyMinutes();
-        return startSession();
-      }
-    };
-
-    ui.choices.appendChild(btn);
-  });
 }
 
 function applyMinutes(){
   const mins = parseInt(ui.minutesSelect.value, 10);
-  state.timer.totalSeconds = mins * 60;
+  state.timer.total = mins * 60;
   state.timer.remaining = mins * 60;
-  ui.timerChip.textContent = formatMMSS(state.timer.remaining);
+  ui.hudTimer.textContent = formatMMSS(state.timer.remaining);
+}
+
+function stopTimer(){
+  state.timer.running = false;
+  if(state.timer.handle) clearInterval(state.timer.handle);
+  state.timer.handle = null;
+  ui.startBtn.disabled = false;
+  ui.pauseBtn.disabled = true;
 }
 
 function startTimer(){
   if(state.timer.running) return;
   state.timer.running = true;
-
-  ui.startSessionBtn.disabled = true;
+  ui.startBtn.disabled = true;
   ui.pauseBtn.disabled = false;
 
-  state.timer.interval = setInterval(() => {
+  state.timer.handle = setInterval(() => {
     state.timer.remaining = Math.max(0, state.timer.remaining - 1);
-    ui.timerChip.textContent = formatMMSS(state.timer.remaining);
+    ui.hudTimer.textContent = formatMMSS(state.timer.remaining);
 
     if(state.timer.remaining <= 0){
       stopTimer();
-      endSessionScore();
+      endSession();
     }
   }, 1000);
 }
 
-function stopTimer(){
-  state.timer.running = false;
-  if(state.timer.interval) clearInterval(state.timer.interval);
-  state.timer.interval = null;
+/* -----------------------
+   TERM BANK (Phase 1)
+   - Starts with Amygdala & Hippocampus
+   - Scaffold list for Chapter 3 terms (you provided a big list)
+------------------------ */
+const TERM_BANK = [
+  {
+    term: "Amygdala",
+    def: "Threat detection + fear-related processing. Flags emotional significance and can strengthen encoding of intense events."
+  },
+  {
+    term: "Hippocampus",
+    def: "Forms new long-term (episodic/spatial) memories. Damage often causes difficulty creating new memories (anterograde amnesia)."
+  },
 
-  ui.startSessionBtn.disabled = false;
-  ui.pauseBtn.disabled = true;
+  // Chapter 3 scaffold (you provided these terms; we’ll expand definitions next)
+  { term: "Neuron", def: "A nerve cell; basic unit of the nervous system." },
+  { term: "Neurotransmitters", def: "Chemical messengers that cross synapses between neurons." },
+  { term: "Action Potential", def: "Electrical signal traveling down an axon." },
+  { term: "Synapse", def: "Junction where neurons communicate." },
+  { term: "Central Nervous System", def: "Brain and spinal cord." },
+  { term: "Peripheral Nervous System", def: "All nerves outside the brain and spinal cord." },
+  { term: "Autonomic Nervous System", def: "Controls involuntary functions; includes sympathetic and parasympathetic systems." },
+];
+
+function renderTerms(){
+  ui.termList.innerHTML = "";
+  TERM_BANK.forEach((t) => {
+    const card = document.createElement("div");
+    card.className = "termCard";
+    card.innerHTML = `
+      <div class="termName">${t.term}</div>
+      <div class="termDef">${t.def}</div>
+    `;
+    ui.termList.appendChild(card);
+  });
 }
 
-function resetAll(){
-  stopTimer();
-  applyMinutes();
+/* -----------------------
+   STORY (Graphic-novel style)
+------------------------ */
+const STORY = {
+  boot: {
+    kicker: "CHAPTER 3 • BIOLOGICAL BASES",
+    title: "BOOT SEQUENCE • THE VEIL REACTIVATES",
+    meta: "Sector A0 • Consciousness Lab • Night Cycle",
+    text:
+`[SYSTEM] Black glass. Quiet fans. A low, patient hum.
+[YOU] The NEUROVEIL console wakes when you touch the panel.
+[SYSTEM] “Your role: Consciousness Researcher. Your task: stabilize memory under stress.”
+[YOU] The screen shows two blinking channels:
+      AMYGDALA  — threat & emotion
+      HIPPOCAMPUS — memory formation
 
-  ui.quizPanel.hidden = true;
-  state.quiz.active = false;
-  state.quiz.idx = 0;
-  state.quiz.selected = null;
-  state.quiz.answers = [];
-  state.quiz.questions = [];
+[SYSTEM] “Begin a Focus Cycle to calibrate.”`,
+    choices: [
+      { label: "Enter calibration chamber", go: "calibration" },
+      { label: "Run a diagnostic scan first", go: "diagnostic" },
+    ]
+  },
 
-  ui.quizOptions.innerHTML = "";
-  ui.quizQuestion.textContent = "";
-  ui.quizSubmitBtn.disabled = true;
+  diagnostic: {
+    kicker: "PROTOCOL • SYSTEM NOTES",
+    title: "DIAGNOSTIC • SYNAPTIC LATTICE",
+    meta: "Sector A0 • Hardware Bay",
+    text:
+`[SYSTEM] “The neural lattice is stable… but your recall is the weak link.”
+[YOU] A note from the last researcher appears:
+      “If you miss AMYGDALA, the world feels hostile.
+       If you miss HIPPOCAMPUS, the world forgets you back.”
 
-  ui.log.innerHTML = "";
-  logLine("System reset.", "sys");
+[SYSTEM] “Begin when ready.”`,
+    choices: [
+      { label: "Return to console", go: "boot" },
+      { label: "Start calibration now", go: "calibration" },
+    ]
+  },
 
-  setStability(50);
-  ui.scoreChip.textContent = "Score: —";
-  state.save.lastScore = null;
-  state.save.missed = [];
+  calibration: {
+    kicker: "SESSION • FOCUS CYCLE",
+    title: "CALIBRATION • LIMBIC GATE ONLINE",
+    meta: "Rules: Start → Quiz begins. End → Score + consequence.",
+    text:
+`[SYSTEM] “When Focus begins, I test you.
+         When Focus ends, I score you.”
+
+[YOU] You breathe once. The chamber’s violet light tightens into a corridor.
+
+[PHASE 1 TARGETS] Amygdala + Hippocampus.`,
+    choices: [
+      { label: "START SESSION (Pomodoro + Knowledge Check)", action: "startSession" },
+      { label: "5-minute test cycle (fast)", action: "startFast" },
+    ]
+  },
+};
+
+function renderNode(id){
+  const n = STORY[id];
+  if(!n){
+    ui.sceneKicker.textContent = "ERROR";
+    ui.sceneTitle.textContent = "MISSING NODE";
+    ui.sceneMeta.textContent = "";
+    ui.sceneText.textContent = `Node '${id}' not found.`;
+    ui.choiceRow.innerHTML = "";
+    return;
+  }
+  state.save.nodeId = id;
   saveNow();
 
-  renderNode(state.save.nodeId || "boot");
+  ui.sceneKicker.textContent = n.kicker;
+  ui.sceneTitle.textContent = n.title;
+  ui.sceneMeta.textContent = n.meta;
+  ui.sceneText.textContent = n.text;
+
+  ui.choiceRow.innerHTML = "";
+  n.choices.forEach((c) => {
+    const b = document.createElement("button");
+    b.className = "choiceBtn";
+    b.textContent = c.label;
+    b.onclick = () => {
+      if(c.go) return renderNode(c.go);
+      if(c.action === "startSession") return startSession(false);
+      if(c.action === "startFast") return startSession(true);
+    };
+    ui.choiceRow.appendChild(b);
+  });
 }
 
-function startSession(){
-  logLine("SESSION START: focus corridor engaged.", "ok");
-  applyMinutes();
-  startTimer();
-  startQuiz();
-}
+/* -----------------------
+   QUIZ (Phase 1: Amygdala + Hippocampus)
+------------------------ */
+const QUESTIONS = [
+  {
+    id:"amygdala_1", concept:"Amygdala",
+    q:"What is the primary role of the amygdala?",
+    opts:[
+      "Balance and fine motor coordination",
+      "Threat detection and fear-related processing",
+      "Direct hormone production",
+      "Vision processing"
+    ],
+    answer:1,
+    teach:"Amygdala = threat detection + fear processing. It helps trigger fight-or-flight responses."
+  },
+  {
+    id:"hippocampus_1", concept:"Hippocampus",
+    q:"Which function is most associated with the hippocampus?",
+    opts:[
+      "Forming new long-term (episodic/spatial) memories",
+      "Regulating breathing rate directly",
+      "Producing dopamine",
+      "Controlling reflex arcs"
+    ],
+    answer:0,
+    teach:"Hippocampus = forming new long-term memories (episodic/spatial)."
+  },
+  {
+    id:"amygdala_2", concept:"Amygdala",
+    q:"Why can amygdala activity affect memory strength?",
+    opts:[
+      "It labels events as emotionally significant",
+      "It prevents neurons from firing",
+      "It blocks all sensory input",
+      "It creates myelin"
+    ],
+    answer:0,
+    teach:"Emotion increases salience; the amygdala flags significance which can strengthen encoding."
+  },
+  {
+    id:"hippocampus_2", concept:"Hippocampus",
+    q:"A classic symptom of hippocampal damage is:",
+    opts:[
+      "Loss of hearing",
+      "Inability to form new memories (anterograde amnesia)",
+      "Loss of reflexes",
+      "Complete loss of language"
+    ],
+    answer:1,
+    teach:"Hippocampal damage can cause anterograde amnesia: difficulty forming new memories."
+  },
+  {
+    id:"mix_1", concept:"Amygdala & Hippocampus",
+    q:"Which pairing best matches function?",
+    opts:[
+      "Amygdala = balance; Hippocampus = reflexes",
+      "Amygdala = emotion/threat; Hippocampus = memory formation",
+      "Amygdala = vision; Hippocampus = hearing",
+      "Amygdala = digestion; Hippocampus = blood pressure"
+    ],
+    answer:1,
+    teach:"Amygdala → emotion/threat. Hippocampus → forming new long-term memories."
+  }
+];
 
 function pickQuestions(n=5){
-  const missed = state.save.missed;
-  const pool = QUESTION_SETS.slice();
+  // prioritize missed concepts
+  const missed = state.save.missed.slice();
+  const pool = QUESTIONS.slice();
 
+  // shuffle pool
   for(let i=pool.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
   const prioritized = [];
-  for(const q of pool){
-    if(missed.includes(q.concept)) prioritized.push(q);
-  }
-  for(const q of pool){
-    if(!missed.includes(q.concept)) prioritized.push(q);
-  }
+  for(const q of pool) if(missed.includes(q.concept)) prioritized.push(q);
+  for(const q of pool) if(!missed.includes(q.concept)) prioritized.push(q);
 
   return prioritized.slice(0, n);
 }
 
 function startQuiz(){
   state.quiz.active = true;
+  state.quiz.questions = pickQuestions(5);
   state.quiz.idx = 0;
   state.quiz.selected = null;
   state.quiz.answers = [];
-  state.quiz.questions = pickQuestions(5);
 
   ui.quizPanel.hidden = false;
-  ui.quizMeta.textContent = "Timer started • Answer to stabilize";
-  logLine("KNOWLEDGE CHECK: limbic/hippocampal calibration initiated.", "sys");
+  ui.submitBtn.disabled = true;
 
-  renderQuizQuestion();
+  logLine("KNOWLEDGE CHECK: calibration initiated.", "sys");
+  renderQuizQ();
 }
 
-function renderQuizQuestion(){
+function renderQuizQ(){
   const q = state.quiz.questions[state.quiz.idx];
-  ui.quizQuestion.textContent = q.q;
-  ui.quizOptions.innerHTML = "";
-  ui.quizSubmitBtn.disabled = true;
+  ui.quizConcept.textContent = `CALIBRATION • ${q.concept.toUpperCase()}`;
+  ui.quizMeta.textContent = "Answer to stabilize the system";
+  ui.quizQ.textContent = q.q;
+
+  ui.quizOpts.innerHTML = "";
+  ui.submitBtn.disabled = true;
   state.quiz.selected = null;
 
-  ui.quizProgress.textContent = `Question ${state.quiz.idx + 1} / ${state.quiz.questions.length}`;
+  ui.quizProgress.textContent = `Question ${state.quiz.idx+1} / ${state.quiz.questions.length}`;
 
-  q.opts.forEach((optText, idx) => {
-    const div = document.createElement("div");
-    div.className = "opt";
-    div.textContent = optText;
-    div.onclick = () => {
-      [...ui.quizOptions.children].forEach(el => el.classList.remove("selected"));
-      div.classList.add("selected");
+  q.opts.forEach((t, idx) => {
+    const opt = document.createElement("div");
+    opt.className = "opt";
+    opt.textContent = t;
+    opt.onclick = () => {
+      [...ui.quizOpts.children].forEach(el => el.classList.remove("selected"));
+      opt.classList.add("selected");
       state.quiz.selected = idx;
-      ui.quizSubmitBtn.disabled = false;
+      ui.submitBtn.disabled = false;
     };
-    ui.quizOptions.appendChild(div);
+    ui.quizOpts.appendChild(opt);
   });
 }
 
-function submitQuizAnswer(){
+function submitQuiz(){
   const q = state.quiz.questions[state.quiz.idx];
   const correct = state.quiz.selected === q.answer;
 
-  state.quiz.answers.push({ id: q.id, concept: q.concept, correct });
+  state.quiz.answers.push({ concept:q.concept, correct });
 
   if(correct){
     logLine(`✔ ${q.concept}: integrity confirmed.`, "ok");
@@ -393,16 +387,17 @@ function submitQuizAnswer(){
     logLine(`✖ ${q.concept}: mismatch detected.`, "warn");
     logLine(`↳ ${q.teach}`, "sys");
     setStability(state.save.stability - 5);
-    if(!state.save.missed.includes(q.concept)){
-      state.save.missed.push(q.concept);
-    }
+    if(!state.save.missed.includes(q.concept)) state.save.missed.push(q.concept);
   }
 
   saveNow();
 
   state.quiz.idx += 1;
-  if(state.quiz.idx >= state.quiz.questions.length) finishQuiz();
-  else renderQuizQuestion();
+  if(state.quiz.idx >= state.quiz.questions.length){
+    finishQuiz();
+  }else{
+    renderQuizQ();
+  }
 }
 
 function finishQuiz(){
@@ -410,46 +405,108 @@ function finishQuiz(){
   const got = state.quiz.answers.filter(a => a.correct).length;
   const pct = Math.round((got/total)*100);
 
-  logLine(`QUIZ COMPLETE: ${got}/${total} correct.`, "sys");
   setScore(pct);
+  logLine(`QUIZ COMPLETE: ${got}/${total} correct.`, "sys");
+
+  // Narrative consequences (Phase 1)
+  if(state.save.missed.includes("Amygdala")){
+    logLine("⚠ AMYGDALA CONSEQUENCE: threat-filter intensifies. The corridor feels hostile.", "warn");
+  }
+  if(state.save.missed.includes("Hippocampus")){
+    logLine("⚠ HIPPOCAMPUS CONSEQUENCE: memory index slips. The corridor repeats fragments.", "warn");
+  }
 
   ui.quizPanel.hidden = true;
   state.quiz.active = false;
-
-  // Narrative consequence tie-in
-  if(state.save.missed.includes("Amygdala")){
-    logLine("⚠ THREAT RESPONSE SPIKE: amygdala misfire detected.", "warn");
-  }
-  if(state.save.missed.includes("Hippocampus")){
-    logLine("⚠ MEMORY CORRUPTION: hippocampal index mismatch.", "warn");
-  }
 }
 
-function endSessionScore(){
+/* -----------------------
+   Session start/end
+------------------------ */
+function startSession(fast){
+  if(fast){
+    ui.minutesSelect.value = "5";
+  }
+  applyMinutes();
+
+  logLine("SESSION START: Focus corridor engaged.", "ok");
+  startTimer();
+  startQuiz();
+}
+
+function endSession(){
   logLine("SESSION END: timer complete.", "sys");
 
-  const last = state.save.lastScore;
-  if(typeof last === "number") logLine(`FINAL SCORE: ${last}%`, "ok");
-  else logLine("FINAL SCORE: — (no quiz completed)", "warn");
+  if(typeof state.save.lastScore === "number"){
+    logLine(`FINAL SCORE: ${state.save.lastScore}%`, "ok");
+  }else{
+    logLine("FINAL SCORE: — (quiz incomplete)", "warn");
+  }
 
+  // Return to calibration node
   renderNode("calibration");
 }
 
-// Wire UI
-ui.startSessionBtn.onclick = () => startSession();
+/* -----------------------
+   Sound toggle (placeholder)
+------------------------ */
+function syncSoundUI(){
+  ui.soundBtn.setAttribute("aria-pressed", String(state.save.soundOn));
+  ui.soundBtn.textContent = state.save.soundOn ? "SOUND: ON" : "SOUND: OFF";
+}
+ui.soundBtn.onclick = () => {
+  state.save.soundOn = !state.save.soundOn;
+  saveNow();
+  syncSoundUI();
+  logLine(state.save.soundOn ? "Audio channel armed (placeholder)." : "Audio channel muted (placeholder).", "sys");
+};
+
+/* -----------------------
+   Wire controls
+------------------------ */
+ui.startBtn.onclick = () => startSession(false);
 ui.pauseBtn.onclick = () => {
   if(state.timer.running){
     stopTimer();
     logLine("SESSION PAUSED.", "sys");
   }
 };
-ui.resetBtn.onclick = () => resetAll();
-ui.minutesSelect.onchange = () => applyMinutes();
-ui.quizSubmitBtn.onclick = () => submitQuizAnswer();
+ui.resetBtn.onclick = () => {
+  stopTimer();
+  ui.quizPanel.hidden = true;
 
-// Boot
+  state.quiz.active = false;
+  state.quiz.questions = [];
+  state.quiz.idx = 0;
+  state.quiz.selected = null;
+  state.quiz.answers = [];
+
+  ui.logBox.innerHTML = "";
+  logLine("System reset.", "sys");
+
+  state.save.stability = 50;
+  state.save.lastScore = null;
+  state.save.missed = [];
+  saveNow();
+
+  setStability(50);
+  ui.hudScore.textContent = "SCORE —";
+  applyMinutes();
+  renderNode("boot");
+};
+
+ui.minutesSelect.onchange = () => applyMinutes();
+ui.submitBtn.onclick = () => submitQuiz();
+
+/* -----------------------
+   Boot
+------------------------ */
+syncSoundUI();
+renderTerms();
+
+setStability(state.save.stability);
+ui.hudScore.textContent = (typeof state.save.lastScore === "number") ? `SCORE ${state.save.lastScore}%` : "SCORE —";
 applyMinutes();
-ui.stabilityChip.textContent = `Stability: ${state.save.stability}`;
-ui.scoreChip.textContent = `Score: ${state.save.lastScore ?? "—"}`;
-logLine("System online.", "sys");
+
+logLine("System online. Neuroveil protocol loaded.", "sys");
 renderNode(state.save.nodeId || "boot");

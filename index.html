@@ -9,88 +9,114 @@
 </head>
 
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand__title">NEUROVEIL</div>
-        <div class="brand__sub">Psychological Sci-Fi Study Engine • Solo Mode</div>
+  <div class="bgFilm"></div>
+  <div class="bgGlow"></div>
+
+  <div class="frame">
+    <header class="topHUD">
+      <div class="brandBlock">
+        <div class="brandTitle">NEUROVEIL</div>
+        <div class="brandSub">A Psychological Sci-Fi Study Engine • Solo Researcher Mode</div>
       </div>
 
-      <div class="status">
-        <div class="chip" id="stabilityChip">Stability: 50</div>
-        <div class="chip" id="scoreChip">Score: —</div>
-        <div class="chip chip--timer" id="timerChip">25:00</div>
+      <div class="hudRight">
+        <div class="hudChip" id="hudStability">STABILITY 050</div>
+        <div class="hudChip" id="hudScore">SCORE —</div>
+        <div class="hudChip hudChipTimer" id="hudTimer">25:00</div>
+
+        <button class="hudBtn" id="soundBtn" aria-pressed="false" title="Toggle sound (placeholder)">
+          SOUND: OFF
+        </button>
       </div>
     </header>
 
-    <main class="grid">
-      <section class="panel panel--story">
-        <div class="panel__header">
-          <div class="panel__title" id="nodeTitle">Boot Sequence</div>
-          <div class="panel__meta" id="nodeMeta">Sector: A0 • Mode: Story</div>
-        </div>
-
-        <div class="panel__body">
-          <div class="story" id="nodeBody"></div>
-          <div class="choices" id="choices"></div>
-        </div>
-      </section>
-
-      <section class="panel panel--ops">
-        <div class="panel__header">
-          <div class="panel__title">Session Control</div>
-          <div class="panel__meta">Pomodoro + Quiz Gate</div>
-        </div>
-
-        <div class="panel__body">
-          <div class="ops">
-            <button class="btn btn--primary" id="startSessionBtn">Start Session</button>
-            <button class="btn" id="pauseBtn" disabled>Pause</button>
-            <button class="btn" id="resetBtn">Reset</button>
+    <main class="layout">
+      <!-- STORY / SCENE -->
+      <section class="panel storyPanel">
+        <div class="panelHeader">
+          <div>
+            <div class="panelKicker" id="sceneKicker">CHAPTER 3 • BIOLOGICAL BASES</div>
+            <div class="panelTitle" id="sceneTitle">BOOT SEQUENCE</div>
           </div>
+          <div class="panelMeta" id="sceneMeta">Sector A0 • Consciousness Lab • Night Cycle</div>
+        </div>
 
-          <div class="ops__row">
-            <label class="label">Pomodoro Length</label>
-            <select class="select" id="minutesSelect">
-              <option value="25" selected>25 minutes</option>
-              <option value="15">15 minutes</option>
-              <option value="10">10 minutes</option>
-              <option value="5">5 minutes (testing)</option>
-            </select>
-          </div>
+        <div class="panelBody">
+          <div class="sceneText" id="sceneText"></div>
+
+          <div class="choiceRow" id="choiceRow"></div>
 
           <div class="divider"></div>
 
-          <div class="log" id="log"></div>
+          <div class="logBox" id="logBox"></div>
         </div>
       </section>
 
-      <section class="panel panel--quiz" id="quizPanel" hidden>
-        <div class="panel__header">
-          <div class="panel__title">Knowledge Check</div>
-          <div class="panel__meta" id="quizMeta">Timer started • Answer to stabilize</div>
+      <!-- CONTROL + TERM BANK -->
+      <aside class="panel sidePanel">
+        <div class="panelHeader">
+          <div>
+            <div class="panelKicker">SESSION PROTOCOL</div>
+            <div class="panelTitle">FOCUS CYCLE</div>
+          </div>
+          <div class="panelMeta">Pomodoro → Quiz Gate → Score</div>
         </div>
 
-        <div class="panel__body">
-          <div class="quiz">
-            <div class="quiz__q" id="quizQuestion"></div>
-            <div class="quiz__opts" id="quizOptions"></div>
+        <div class="panelBody">
+          <div class="controls">
+            <button class="btn btnPrimary" id="startBtn">START SESSION</button>
+            <button class="btn" id="pauseBtn" disabled>PAUSE</button>
+            <button class="btn" id="resetBtn">RESET</button>
+          </div>
 
-            <div class="quiz__footer">
-              <div class="quiz__progress" id="quizProgress">Question 1 / 5</div>
-              <button class="btn btn--primary" id="quizSubmitBtn" disabled>Submit</button>
-            </div>
+          <label class="label">Pomodoro Length</label>
+          <select class="select" id="minutesSelect">
+            <option value="25" selected>25 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="5">5 minutes (testing)</option>
+          </select>
+
+          <div class="divider"></div>
+
+          <div class="termHeader">
+            <div class="termTitle">TERM BANK • PHASE 1</div>
+            <div class="termSub">Start with Amygdala + Hippocampus (then Chapter 3 bank)</div>
+          </div>
+
+          <div class="termList" id="termList"></div>
+        </div>
+      </aside>
+
+      <!-- QUIZ OVERLAY PANEL -->
+      <section class="panel quizPanel" id="quizPanel" hidden>
+        <div class="panelHeader quizHeader">
+          <div>
+            <div class="panelKicker">KNOWLEDGE CHECK</div>
+            <div class="panelTitle" id="quizConcept">CALIBRATION</div>
+          </div>
+          <div class="panelMeta" id="quizMeta">Answer to stabilize the system</div>
+        </div>
+
+        <div class="panelBody">
+          <div class="quizQ" id="quizQ"></div>
+          <div class="quizOpts" id="quizOpts"></div>
+
+          <div class="quizFooter">
+            <div class="quizProgress" id="quizProgress">Question 1 / 5</div>
+            <button class="btn btnPrimary" id="submitBtn" disabled>SUBMIT</button>
           </div>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <div class="footer__left">Dark Mode Only • Cinematic Psychological Sci-Fi</div>
-      <div class="footer__right" id="buildTag">Build: Phase 1</div>
+      <div>Dark Mode Only • Graphic-Novel Cinematic UI • Built for your OpenStax study loop</div>
+      <div class="buildTag">PHASE 1</div>
     </footer>
   </div>
 
   <script src="app.js"></script>
 </body>
 </html>
+
