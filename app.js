@@ -292,7 +292,7 @@ function renderNode(id){
 /* -----------------------
    QUIZ (Phase 1: Amygdala + Hippocampus)
 ------------------------ */
-const QUESTIONS = [
+const CURATED_QUESTIONS = [
   {
     id:"amygdala_1", concept:"Amygdala",
     q:"What is the primary role of the amygdala?",
@@ -316,61 +316,80 @@ const QUESTIONS = [
     ],
     answer:0,
     teach:"Hippocampus = forming new long-term memories (episodic/spatial)."
-  },
-  {
-    id:"amygdala_2", concept:"Amygdala",
-    q:"Why can amygdala activity affect memory strength?",
-    opts:[
-      "It labels events as emotionally significant",
-      "It prevents neurons from firing",
-      "It blocks all sensory input",
-      "It creates myelin"
-    ],
-    answer:0,
-    teach:"Emotion increases salience; the amygdala flags significance which can strengthen encoding."
-  },
-  {
-    id:"hippocampus_2", concept:"Hippocampus",
-    q:"A classic symptom of hippocampal damage is:",
-    opts:[
-      "Loss of hearing",
-      "Inability to form new memories (anterograde amnesia)",
-      "Loss of reflexes",
-      "Complete loss of language"
-    ],
-    answer:1,
-    teach:"Hippocampal damage can cause anterograde amnesia: difficulty forming new memories."
-  },
-  {
-    id:"mix_1", concept:"Amygdala & Hippocampus",
-    q:"Which pairing best matches function?",
-    opts:[
-      "Amygdala = balance; Hippocampus = reflexes",
-      "Amygdala = emotion/threat; Hippocampus = memory formation",
-      "Amygdala = vision; Hippocampus = hearing",
-      "Amygdala = digestion; Hippocampus = blood pressure"
-    ],
-    answer:1,
-    teach:"Amygdala → emotion/threat. Hippocampus → forming new long-term memories."
   }
 ];
 
-function pickQuestions(n=5){
-  // prioritize missed concepts
-  const missed = state.save.missed.slice();
-  const pool = QUESTIONS.slice();
+function buildQuestionPool(){
+  const pool = [];
 
-  // shuffle pool
+  // Always include curated A/H questions
+  pool.push(...CURATED_QUESTIONS);
+
+  // Add definition MCQs for every term (including A/H too—fine for repetition)
+  TERM_BANK.forEach(t => {
+    if(t.def){
+      pool.push(buildDefinitionMCQ(t));
+    }
+  });
+
+  return pool;
+}
+
+
+function getTermByConceptName(name){
+  return TERM_BANK.find(t => t.term === name) || null;
+}
+
+const PHASE1_CONCEPTS = ["Amygdala", "Hippocampus"];
+
+function buildDefinitionMCQ(termObj){
+  // pick 3 distractors from other terms' definitions
+  const others = TERM_BANK.filter(t => t.id !== termObj.id && t.def);
+  // shuffle
+  for(let i=others.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [others[i], others[j]] = [others[j], others[i]];
+  }
+  const distractors = others.slice(0,3).map(t => t.def);
+
+  const options = [termObj.def, ...distractors];
+  // shuffle options
+  for(let i=options.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+
+  const answerIndex = options.indexOf(termObj.def);
+
+  return {
+    id: `def_${termObj.id}`,
+    concept: termObj.term,
+    q: `Which definition best matches: ${termObj.term}?`,
+    opts: options,
+    answer: answerIndex,
+    teach: termObj.learn || termObj.def
+  };
+}
+
+function pickQuestions(n=5){
+  const missed = state.save.missed.slice();
+
+  // Build pool then LOCK to Phase 1 concepts only
+  const pool = buildQuestionPool().filter(q => PHASE1_CONCEPTS.includes(q.concept));
+
+  // shuffle
   for(let i=pool.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
+  // prioritize missed (but only if they are Phase 1 concepts)
   const prioritized = [];
   for(const q of pool) if(missed.includes(q.concept)) prioritized.push(q);
   for(const q of pool) if(!missed.includes(q.concept)) prioritized.push(q);
 
-  return prioritized.slice(0, n);
+  // In case pool is smaller than n, just return what's available
+  return prioritized.slice(0, Math.min(n, prioritized.length));
 }
 
 function startQuiz(){
@@ -449,12 +468,13 @@ function finishQuiz(){
   logLine(`QUIZ COMPLETE: ${got}/${total} correct.`, "sys");
 
   // Narrative consequences (Phase 1)
-  if(state.save.missed.includes("Amygdala")){
-    logLine("⚠ AMYGDALA CONSEQUENCE: threat-filter intensifies. The corridor feels hostile.", "warn");
+  // Narrative consequences (data-driven)
+state.save.missed.forEach((conceptName) => {
+  const t = getTermByConceptName(conceptName);
+  if(t && t.consequence){
+    logLine(`⚠ ${t.term.toUpperCase()} CONSEQUENCE: ${t.consequence}`, "warn");
   }
-  if(state.save.missed.includes("Hippocampus")){
-    logLine("⚠ HIPPOCAMPUS CONSEQUENCE: memory index slips. The corridor repeats fragments.", "warn");
-  }
+});
 
   ui.quizPanel.hidden = true;
   state.quiz.active = false;
