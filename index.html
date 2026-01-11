@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>NEUROVEIL</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand__title">NEUROVEIL</div>
+        <div class="brand__sub">Psychological Sci-Fi Study Engine • Solo Mode</div>
+      </div>
+
+      <div class="status">
+        <div class="chip" id="stabilityChip">Stability: 50</div>
+        <div class="chip" id="scoreChip">Score: —</div>
+        <div class="chip chip--timer" id="timerChip">25:00</div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="panel panel--story">
+        <div class="panel__header">
+          <div class="panel__title" id="nodeTitle">Boot Sequence</div>
+          <div class="panel__meta" id="nodeMeta">Sector: A0 • Mode: Story</div>
+        </div>
+
+        <div class="panel__body">
+          <div class="story" id="nodeBody"></div>
+          <div class="choices" id="choices"></div>
+        </div>
+      </section>
+
+      <section class="panel panel--ops">
+        <div class="panel__header">
+          <div class="panel__title">Session Control</div>
+          <div class="panel__meta">Pomodoro + Quiz Gate</div>
+        </div>
+
+        <div class="panel__body">
+          <div class="ops">
+            <button class="btn btn--primary" id="startSessionBtn">Start Session</button>
+            <button class="btn" id="pauseBtn" disabled>Pause</button>
+            <button class="btn" id="resetBtn">Reset</button>
+          </div>
+
+          <div class="ops__row">
+            <label class="label">Pomodoro Length</label>
+            <select class="select" id="minutesSelect">
+              <option value="25" selected>25 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="10">10 minutes</option>
+              <option value="5">5 minutes (testing)</option>
+            </select>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="log" id="log"></div>
+        </div>
+      </section>
+
+      <section class="panel panel--quiz" id="quizPanel" hidden>
+        <div class="panel__header">
+          <div class="panel__title">Knowledge Check</div>
+          <div class="panel__meta" id="quizMeta">Timer started • Answer to stabilize</div>
+        </div>
+
+        <div class="panel__body">
+          <div class="quiz">
+            <div class="quiz__q" id="quizQuestion"></div>
+            <div class="quiz__opts" id="quizOptions"></div>
+
+            <div class="quiz__footer">
+              <div class="quiz__progress" id="quizProgress">Question 1 / 5</div>
+              <button class="btn btn--primary" id="quizSubmitBtn" disabled>Submit</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__left">Dark Mode Only • Cinematic Psychological Sci-Fi</div>
+      <div class="footer__right" id="buildTag">Build: Phase 1</div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
