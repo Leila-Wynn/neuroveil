@@ -282,8 +282,8 @@ A door marked FIGHT-OR-FLIGHT unlocks.
 
 [MISSION] Identify sympathetic vs parasympathetic responses before the corridor escalates.`,
     choices: [
-      { label: "Return to calibration", go: "calibration" }
-    ]
+  { label: "Stabilize the corridor through biology", go: "module1_intro" }
+]
   },
 
   route_memory: {
@@ -298,8 +298,8 @@ A door marked ENCODING flickers.
 
 [MISSION] Explain hippocampus function to repair the index.`,
     choices: [
-      { label: "Return to calibration", go: "calibration" }
-    ]
+  { label: "Repair memory index by rebuilding signaling", go: "module1_intro" }
+]
   },
 
   route_clear: {
@@ -312,9 +312,83 @@ A door marked ENCODING flickers.
 
 [MISSION] Proceed to Chapter 3: Neuron signaling.`,
     choices: [
-      { label: "Return to calibration", go: "calibration" }
+  { label: "Proceed to Module 1: Neuron signaling", go: "module1_intro" }
+]
+  },
+
+    module1_intro: {
+    kicker: "CHAPTER 3 • MODULE 1",
+    title: "NEURON SIGNALING • THE FIRST CIRCUIT",
+    meta: "You are rebuilding stability through biology.",
+    text:
+`[SYSTEM] “Next objective: restore signal integrity.”
+[YOU] A glass wall reveals billions of faint lines—like a city seen from orbit.
+[SYSTEM] “Neurons. Signals. Synapses.”
+[YOU] The corridor offers two interfaces: one for STRUCTURE, one for SIGNAL.
+
+Choose your approach.`,
+    choices: [
+      { label: "Inspect neuron structure (dendrite → soma → axon)", go: "module1_structure" },
+      { label: "Trace a signal (action potential → synapse)", go: "module1_signal" }
     ]
-  }
+  },
+
+  module1_structure: {
+    kicker: "CHAPTER 3 • MODULE 1",
+    title: "STRUCTURE MODE • THE NEURON MAP",
+    meta: "Learn: dendrite, cell body, axon, myelin, terminal buttons",
+    text:
+`[YOU] The interface overlays a neuron like a blueprint.
+[SYSTEM] “Dendrites receive. Cell body integrates. Axon transmits.”
+A highlight flashes along a sheath:
+[SYSTEM] “Myelin speeds transmission.”
+
+A single question appears—quiet but unavoidable:
+“What part receives input first?”`,
+    choices: [
+      { label: "Dendrites (receive incoming signals)", action: "microCheck_dendrite" },
+      { label: "Axon (sends signals outward)", action: "microCheck_wrong" },
+      { label: "Myelin sheath (insulation)", action: "microCheck_wrong" }
+    ]
+  },
+
+  module1_signal: {
+    kicker: "CHAPTER 3 • MODULE 1",
+    title: "SIGNAL MODE • VOLTAGE AND RELEASE",
+    meta: "Learn: action potential, synapse, neurotransmitters, receptors",
+    text:
+`[YOU] The corridor becomes a pulse—bright → dark → bright.
+[SYSTEM] “Action potential initiated.”
+The pulse hits a gap:
+[SYSTEM] “Synapse.”
+A shimmer crosses:
+[SYSTEM] “Neurotransmitters released. Receptors receive.”
+
+A calibration prompt appears:
+“What crosses the synaptic gap?”`,
+    choices: [
+      { label: "Neurotransmitters (chemical messengers)", action: "microCheck_nt" },
+      { label: "Myelin (insulation on axon)", action: "microCheck_wrong" },
+      { label: "Dendrites (receiving branches)", action: "microCheck_wrong" }
+    ]
+  },
+
+  module1_complete: {
+    kicker: "MODULE COMPLETE",
+    title: "CHECKPOINT • SIGNAL STABILIZED",
+    meta: "You unlocked the next module.",
+    text:
+`[SYSTEM] “Good. The corridor holds.”
+[YOU] The environment stops twitching—just slightly.
+A sealed door appears with a new label:
+
+“Nervous System Divisions: CNS vs PNS.”
+
+[SYSTEM] “Continue when ready.”`,
+    choices: [
+      { label: "Return to calibration (start another Pomodoro)", go: "calibration" }
+    ]
+  },
 
 };
 
@@ -328,7 +402,7 @@ function renderNode(id){
     ui.choiceRow.innerHTML = "";
     return;
   }
-  state.save.nodeId = id;
+  state.save.node = id;
   saveNow();
 
   ui.sceneKicker.textContent = n.kicker;
@@ -345,6 +419,10 @@ function renderNode(id){
       if(c.go) return renderNode(c.go);
       if(c.action === "startSession") return startSession(false);
       if(c.action === "startFast") return startSession(true);
+      if(c.action === "continueAfterQuiz") return continueAfterQuiz();
+      if(c.action === "microCheck_dendrite") return microCheck(true, "Dendrites receive incoming signals first.");
+      if(c.action === "microCheck_nt") return microCheck(true, "Neurotransmitters cross the synaptic gap and bind to receptors.");
+      if(c.action === "microCheck_wrong") return microCheck(false, "Not quite. Re-read the system hints and try again.");
     };
     ui.choiceRow.appendChild(b);
   });
@@ -528,34 +606,44 @@ function finishQuiz(){
   setScore(pct);
   logLine(`QUIZ COMPLETE: ${got}/${total} correct.`, "sys");
 
-  // Narrative consequences (Phase 1)
   // Narrative consequences (data-driven)
-state.save.missed.forEach((conceptName) => {
-  const t = getTermByConceptName(conceptName);
-  if(t && t.consequence){
-    logLine(`⚠ ${t.term.toUpperCase()} CONSEQUENCE: ${t.consequence}`, "warn");
-  }
-});
+  state.save.missed.forEach((conceptName) => {
+    const t = getTermByConceptName(conceptName);
+    if(t && t.consequence){
+      logLine(`⚠ ${t.term.toUpperCase()} CONSEQUENCE: ${t.consequence}`, "warn");
+    }
+  });
+
+  // ✅ First close quiz UI
+  ui.quizPanel.hidden = true;
+state.quiz.active = false;
 
 renderNode("post_quiz");
-
-  ui.quizPanel.hidden = true;
-  state.quiz.active = false;
+return;
 }
 
 function continueAfterQuiz(){
-  // Route based on what was missed in Phase 1
-  const missed = state.save.missed;
+  const missed = state.save.missed || [];
 
   if(missed.includes("Amygdala")){
-    renderNode("route_threat");
-    return;
+    return renderNode("route_threat");
   }
   if(missed.includes("Hippocampus")){
-    renderNode("route_memory");
-    return;
+    return renderNode("route_memory");
   }
-  renderNode("route_clear");
+  return renderNode("route_clear");
+}
+
+function microCheck(correct, message){
+  if(correct){
+    logLine(`✔ MICRO-CHECK: ${message}`, "ok");
+    setStability(state.save.stability + 2);
+    renderNode("module1_complete");
+  }else{
+    logLine(`✖ MICRO-CHECK: ${message}`, "warn");
+    setStability(state.save.stability - 2);
+    // Stay on the same node so the player can choose again
+  }
 }
 
 /* -----------------------
@@ -630,7 +718,7 @@ ui.resetBtn.onclick = () => {
   setStability(50);
   ui.hudScore.textContent = "SCORE —";
   applyMinutes();
-  renderNode("boot");
+  renderNode("post_quiz");
 };
 
 ui.minutesSelect.onchange = () => applyMinutes();
