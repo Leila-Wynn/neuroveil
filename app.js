@@ -255,6 +255,67 @@ const STORY = {
       { label: "5-minute test cycle (fast)", action: "startFast" },
     ]
   },
+
+  post_quiz: {
+    kicker: "SESSION • AFTER-ACTION",
+    title: "CALIBRATION RESULT • CORRIDOR STABILIZED?",
+    meta: "Your answers changed the environment.",
+    text:
+`[SYSTEM] The chamber listens to your recall.
+[YOU] The corridor responds — not to your courage… but to your accuracy.
+
+[SYSTEM] “Proceed. Your next scene is determined by what you failed to stabilize.”`,
+    choices: [
+      { label: "Continue deeper into the corridor", action: "continueAfterQuiz" }
+    ]
+  },
+
+  route_threat: {
+    kicker: "AMYGDALA • THREAT FILTER",
+    title: "THE HALL OF FALSE ALARMS",
+    meta: "Consequence route: Amygdala mismatch",
+    text:
+`[SYSTEM] ⚠ THREAT RESPONSE SPIKE confirmed.
+[YOU] The corridor re-renders as hostile architecture. Shadows feel intentional.
+
+A door marked FIGHT-OR-FLIGHT unlocks.
+
+[MISSION] Identify sympathetic vs parasympathetic responses before the corridor escalates.`,
+    choices: [
+      { label: "Return to calibration", go: "calibration" }
+    ]
+  },
+
+  route_memory: {
+    kicker: "HIPPOCAMPUS • MEMORY INDEX",
+    title: "THE LOOPING ARCHIVE",
+    meta: "Consequence route: Hippocampus mismatch",
+    text:
+`[SYSTEM] ⚠ MEMORY CORRUPTION confirmed.
+[YOU] The corridor repeats. A scene plays twice with different details.
+
+A door marked ENCODING flickers.
+
+[MISSION] Explain hippocampus function to repair the index.`,
+    choices: [
+      { label: "Return to calibration", go: "calibration" }
+    ]
+  },
+
+  route_clear: {
+    kicker: "SYSTEM • STABILITY",
+    title: "CLEAR PASSAGE",
+    meta: "No phase-1 mismatches detected",
+    text:
+`[SYSTEM] Stability holds. The corridor stays quiet.
+[YOU] You earned a clean passage.
+
+[MISSION] Proceed to Chapter 3: Neuron signaling.`,
+    choices: [
+      { label: "Return to calibration", go: "calibration" }
+    ]
+  }
+
 };
 
 function renderNode(id){
@@ -394,7 +455,7 @@ function pickQuestions(n=5){
 
 function startQuiz(){
   state.quiz.active = true;
-  state.quiz.questions = pickQuestions(5);
+  state.quiz.questions = pickQuestions(4);
   state.quiz.idx = 0;
   state.quiz.selected = null;
   state.quiz.answers = [];
@@ -476,8 +537,25 @@ state.save.missed.forEach((conceptName) => {
   }
 });
 
+renderNode("post_quiz");
+
   ui.quizPanel.hidden = true;
   state.quiz.active = false;
+}
+
+function continueAfterQuiz(){
+  // Route based on what was missed in Phase 1
+  const missed = state.save.missed;
+
+  if(missed.includes("Amygdala")){
+    renderNode("route_threat");
+    return;
+  }
+  if(missed.includes("Hippocampus")){
+    renderNode("route_memory");
+    return;
+  }
+  renderNode("route_clear");
 }
 
 /* -----------------------
