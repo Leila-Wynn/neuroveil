@@ -300,6 +300,12 @@ body{
   line-height: 1.5;
 }
 
+.termHint{ 
+  margin-top:6px; 
+  font-size:11px; 
+  color: rgba(233,238,255,.55); 
+}
+
 .quizPanel{
   grid-column: 1 / -1;
 }

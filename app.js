@@ -128,36 +128,76 @@ function startTimer(){
 ------------------------ */
 const TERM_BANK = [
   {
+    id: "amygdala",
     term: "Amygdala",
-    def: "Threat detection + fear-related processing. Flags emotional significance and can strengthen encoding of intense events."
+    chapter: "8.2",
+    tags: ["memory", "emotion", "fear", "threat"],
+    def: "Threat detection and fear-related processing; flags emotional significance and can strengthen encoding of intense events.",
+    learn: "Amygdala = alarm system. It tags danger/emotion and can boost memory strength.",
+    consequence: "THREAT RESPONSE SPIKE — the corridor feels hostile; perception shifts toward danger."
   },
   {
+    id: "hippocampus",
     term: "Hippocampus",
-    def: "Forms new long-term (episodic/spatial) memories. Damage often causes difficulty creating new memories (anterograde amnesia)."
+    chapter: "8.2",
+    tags: ["memory", "encoding", "episodic", "spatial"],
+    def: "Forms new long-term (episodic/spatial) memories; damage often causes difficulty forming new memories (anterograde amnesia).",
+    learn: "Hippocampus = memory librarian. It files new memories; damage → can’t create new files.",
+    consequence: "MEMORY CORRUPTION — fragments loop; scenes feel repeated and unstable."
   },
 
-  // Chapter 3 scaffold (you provided these terms; we’ll expand definitions next)
-  { term: "Neuron", def: "A nerve cell; basic unit of the nervous system." },
-  { term: "Neurotransmitters", def: "Chemical messengers that cross synapses between neurons." },
-  { term: "Action Potential", def: "Electrical signal traveling down an axon." },
-  { term: "Synapse", def: "Junction where neurons communicate." },
-  { term: "Central Nervous System", def: "Brain and spinal cord." },
-  { term: "Peripheral Nervous System", def: "All nerves outside the brain and spinal cord." },
-  { term: "Autonomic Nervous System", def: "Controls involuntary functions; includes sympathetic and parasympathetic systems." },
+  // Chapter 3 scaffold examples (you will expand this list with your full terms)
+  {
+    id: "neuron",
+    term: "Neuron",
+    chapter: "3",
+    tags: ["cell", "nervous-system"],
+    def: "A nerve cell; the basic unit of the nervous system.",
+    learn: "Neurons communicate via electrical signals (action potentials) and chemical signals (neurotransmitters)."
+  },
+  {
+    id: "action_potential",
+    term: "Action Potential",
+    chapter: "3",
+    tags: ["electric", "signal"],
+    def: "An electrical signal that travels down the axon of a neuron.",
+    learn: "All-or-none electrical impulse; enables rapid communication."
+  },
+  {
+    id: "synapse",
+    term: "Synapse",
+    chapter: "3",
+    tags: ["communication", "neurotransmitters"],
+    def: "The junction where neurons communicate—typically by neurotransmitters crossing a synaptic gap.",
+    learn: "Synapse = handoff point between neurons."
+  }
 ];
+
 
 function renderTerms(){
   ui.termList.innerHTML = "";
   TERM_BANK.forEach((t) => {
     const card = document.createElement("div");
     card.className = "termCard";
+
     card.innerHTML = `
       <div class="termName">${t.term}</div>
       <div class="termDef">${t.def}</div>
+      <div class="termHint">Click to expand</div>
     `;
+
+    card.onclick = () => {
+      logLine(`TERM LOADED: ${t.term}`, "sys");
+      logLine(`↳ ${t.learn || t.def}`, "sys");
+      if(t.consequence){
+        logLine(`↳ Narrative consequence (if missed): ${t.consequence}`, "warn");
+      }
+    };
+
     ui.termList.appendChild(card);
   });
 }
+
 
 /* -----------------------
    STORY (Graphic-novel style)
