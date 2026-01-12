@@ -394,9 +394,162 @@ A sealed door appears with a new label:
 
 [SYSTEM] “Continue when ready.”`,
     choices: [
-      { label: "Return to calibration (start another Pomodoro)", go: "calibration" }
-    ]
+  { label: "Proceed to Module 2: Control systems", go: "module2_intro" }
+]
   },
+module2_intro: {
+  kicker: "CHAPTER 3 • SYSTEMS",
+  title: "MODULE 2 • CONTROL VS REFLEX",
+  meta: "Objective: restore command hierarchy.",
+  text:
+`[SYSTEM] “Signal integrity restored.”
+[YOU] The corridor splits into two architectures.
+
+One chamber pulses with deliberate thought.
+Another hums with automatic response.
+
+[SYSTEM] “Choose where control originates.”`,
+  choices: [
+    { label: "Enter Central Command (CNS)", go: "module2_cns" },
+    { label: "Enter Peripheral Network (PNS)", go: "module2_pns" }
+  ]
+},
+
+module2_cns: {
+  kicker: "MODULE 2 • CNS",
+  title: "CENTRAL NERVOUS SYSTEM",
+  meta: "Brain & spinal cord",
+  text:
+`[YOU] The room sharpens—quiet, focused.
+[SYSTEM] “Central Nervous System.”
+[YOU] Thoughts here become commands.
+Decisions form before movement exists.
+
+Micro-check:
+Which system includes the brain and spinal cord?`,
+  choices: [
+    { label: "Central Nervous System (CNS)", action: "microCheck_cns" },
+    { label: "Peripheral Nervous System (PNS)", action: "microCheck_wrong" }
+  ]
+},
+
+module2_pns: {
+  kicker: "MODULE 2 • PNS",
+  title: "PERIPHERAL NERVOUS SYSTEM",
+  meta: "Communication lines",
+  text:
+`[YOU] Signals race outward—fast, automatic.
+[SYSTEM] “Peripheral Nervous System.”
+[YOU] This network connects command to action.
+
+Micro-check:
+What does the PNS primarily do?`,
+  choices: [
+    { label: "Connects CNS to body & senses", action: "microCheck_pns" },
+    { label: "Generates conscious decisions", action: "microCheck_wrong" }
+  ]
+},
+
+module2_split: {
+  kicker: "MODULE 2 • DIVISION",
+  title: "VOLUNTARY VS AUTOMATIC",
+  meta: "Somatic vs Autonomic",
+  text:
+`[SYSTEM] “Peripheral control subdivides.”
+Two subsystems emerge.
+
+One obeys conscious will.
+The other ignores it—keeping you alive.`,
+  choices: [
+    { label: "Somatic Nervous System", go: "module2_somatic" },
+    { label: "Autonomic Nervous System", go: "module2_autonomic" }
+  ]
+},
+
+module2_somatic: {
+  kicker: "MODULE 2 • SOMATIC",
+  title: "VOLUNTARY CONTROL",
+  meta: "Movement under conscious intent",
+  text:
+`[YOU] Muscles respond when you decide.
+[SYSTEM] “Somatic Nervous System.”
+[YOU] You move because you choose to.
+
+Micro-check:
+Which system controls voluntary movement?`,
+  choices: [
+    { label: "Somatic Nervous System", action: "microCheck_somatic" },
+    { label: "Autonomic Nervous System", action: "microCheck_wrong" }
+  ]
+},
+
+module2_autonomic: {
+  kicker: "MODULE 2 • AUTONOMIC",
+  title: "SURVIVAL MODE",
+  meta: "Automatic regulation",
+  text:
+`[YOU] Heartbeat. Breathing. Digestion.
+[SYSTEM] “Autonomic Nervous System.”
+[YOU] It acts without asking.
+
+Two states flicker:
+Acceleration.
+Recovery.`,
+  choices: [
+    { label: "Sympathetic (fight or flight)", go: "module2_sympathetic" },
+    { label: "Parasympathetic (rest & digest)", go: "module2_parasympathetic" }
+  ]
+},
+
+module2_sympathetic: {
+  kicker: "MODULE 2 • AUTONOMIC",
+  title: "SYMPATHETIC STATE",
+  meta: "Threat response",
+  text:
+`⚠ ALERT STATE ENGAGED
+[SYSTEM] “Sympathetic activation.”
+[YOU] Heart rate spikes. Attention narrows.
+
+Micro-check:
+Which state prepares the body for action?`,
+  choices: [
+    { label: "Sympathetic nervous system", action: "microCheck_sympathetic" },
+    { label: "Parasympathetic nervous system", action: "microCheck_wrong" }
+  ]
+},
+
+module2_parasympathetic: {
+  kicker: "MODULE 2 • AUTONOMIC",
+  title: "PARASYMPATHETIC STATE",
+  meta: "Recovery mode",
+  text:
+`[SYSTEM] “Parasympathetic dominance.”
+[YOU] Breathing slows. Systems recover.
+
+Micro-check:
+Which state restores the body after stress?`,
+  choices: [
+    { label: "Parasympathetic nervous system", action: "microCheck_parasympathetic" },
+    { label: "Sympathetic nervous system", action: "microCheck_wrong" }
+  ]
+},
+
+module2_complete: {
+  kicker: "MODULE COMPLETE",
+  title: "CHECKPOINT • COMMAND HIERARCHY STABLE",
+  meta: "Next: Neurotransmitters & chemical balance",
+  text:
+`[SYSTEM] “Control restored.”
+[YOU] Reflex, intent, and survival fall back into balance.
+
+A new door unlocks:
+“Chemical Messengers.”
+
+Proceed when ready.`,
+  choices: [
+    { label: "Return to calibration (next Pomodoro)", go: "calibration" }
+  ]
+},
 
 };
 
@@ -442,6 +595,12 @@ function renderNode(id){
         if(c.action === "microCheck_dendrite") return microCheck(true, "Dendrites receive incoming signals first.");
         if(c.action === "microCheck_nt") return microCheck(true, "Neurotransmitters cross the synaptic gap and bind to receptors.");
         if(c.action === "microCheck_wrong") return microCheck(false, "Not quite. Re-read the system hints and try again.");
+
+        if(c.action === "microCheck_cns") return microCheck(true, "CNS includes the brain and spinal cord.");
+        if(c.action === "microCheck_pns") return microCheck(true, "PNS connects the CNS to the rest of the body.");
+        if(c.action === "microCheck_somatic") return microCheck(true, "Somatic controls voluntary movement.");
+        if(c.action === "microCheck_sympathetic") return microCheck(true, "Sympathetic prepares the body for action.");
+        if(c.action === "microCheck_parasympathetic") return microCheck(true, "Parasympathetic restores the body after stress.");
       }
     );
 
@@ -756,4 +915,4 @@ ui.hudScore.textContent = (typeof state.save.lastScore === "number") ? `SCORE ${
 applyMinutes();
 
 logLine("System online. Neuroveil protocol loaded.", "sys");
-renderNode(state.save.nodeId || "boot");
+renderNode(state.save.node || "boot");
