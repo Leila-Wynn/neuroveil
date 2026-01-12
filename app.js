@@ -77,6 +77,14 @@ function logLine(text, cls="sys"){
   ui.logBox.scrollTop = ui.logBox.scrollHeight;
 }
 
+function safeRun(label, fn){
+  try{
+    fn();
+  }catch(e){
+    logLine(`⛔ CLICK ERROR (${label}): ${e.message}`, "warn");
+  }
+}
+
 function setStability(v){
   state.save.stability = clamp(v, 0, 100);
   ui.hudStability.textContent = `STABILITY ${pad2(state.save.stability)}`;
@@ -394,6 +402,7 @@ A sealed door appears with a new label:
 
 function renderNode(id){
   const n = STORY[id];
+
   if(!n){
     ui.sceneKicker.textContent = "ERROR";
     ui.sceneTitle.textContent = "MISSING NODE";
@@ -402,28 +411,40 @@ function renderNode(id){
     ui.choiceRow.innerHTML = "";
     return;
   }
+
+  // Persist current node
   state.save.node = id;
   saveNow();
 
-  ui.sceneKicker.textContent = n.kicker;
-  ui.sceneTitle.textContent = n.title;
-  ui.sceneMeta.textContent = n.meta;
-  ui.sceneText.textContent = n.text;
+  // Render text
+  ui.sceneKicker.textContent = n.kicker || "";
+  ui.sceneTitle.textContent = n.title || "";
+  ui.sceneMeta.textContent = n.meta || "";
+  ui.sceneText.textContent = n.text || "";
 
+  // Render choices
   ui.choiceRow.innerHTML = "";
-  n.choices.forEach((c) => {
+
+  (n.choices || []).forEach((c) => {
     const b = document.createElement("button");
     b.className = "choiceBtn";
-    b.textContent = c.label;
-    b.onclick = () => {
-      if(c.go) return renderNode(c.go);
-      if(c.action === "startSession") return startSession(false);
-      if(c.action === "startFast") return startSession(true);
-      if(c.action === "continueAfterQuiz") return continueAfterQuiz();
-      if(c.action === "microCheck_dendrite") return microCheck(true, "Dendrites receive incoming signals first.");
-      if(c.action === "microCheck_nt") return microCheck(true, "Neurotransmitters cross the synaptic gap and bind to receptors.");
-      if(c.action === "microCheck_wrong") return microCheck(false, "Not quite. Re-read the system hints and try again.");
-    };
+    b.textContent = c.label || "Continue";
+
+    b.onclick = () => safeRun(
+      c.label || c.action || c.go || "choice",
+      () => {
+        if(c.go) return renderNode(c.go);
+
+        if(c.action === "startSession") return startSession(false);
+        if(c.action === "startFast") return startSession(true);
+        if(c.action === "continueAfterQuiz") return continueAfterQuiz();
+
+        if(c.action === "microCheck_dendrite") return microCheck(true, "Dendrites receive incoming signals first.");
+        if(c.action === "microCheck_nt") return microCheck(true, "Neurotransmitters cross the synaptic gap and bind to receptors.");
+        if(c.action === "microCheck_wrong") return microCheck(false, "Not quite. Re-read the system hints and try again.");
+      }
+    );
+
     ui.choiceRow.appendChild(b);
   });
 }
