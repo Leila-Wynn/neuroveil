@@ -38,7 +38,7 @@ const ui = {
   submitBtn: $("submitBtn"),
 };
 
-const SAVE_KEY = "neuroveil_phase1_save";
+const SAVE_KEY = "neuroveil_phase1_save_v2";
 
 function loadSave(){
   try{
@@ -565,8 +565,8 @@ function renderNode(id){
     return;
   }
 
-  // Persist current node
-  state.save.node = id;
+  // Persist current node (✅ correct key)
+  state.save.nodeId = id;
   saveNow();
 
   // Render text
@@ -592,15 +592,17 @@ function renderNode(id){
         if(c.action === "startFast") return startSession(true);
         if(c.action === "continueAfterQuiz") return continueAfterQuiz();
 
-        if(c.action === "microCheck_dendrite") return microCheck(true, "Dendrites receive incoming signals first.");
-        if(c.action === "microCheck_nt") return microCheck(true, "Neurotransmitters cross the synaptic gap and bind to receptors.");
+        // --- Module 1 checks ---
+        if(c.action === "microCheck_dendrite") return microCheck(true, "Dendrites receive incoming signals first.", "module1_complete");
+        if(c.action === "microCheck_nt") return microCheck(true, "Neurotransmitters cross the synaptic gap and bind to receptors.", "module1_complete");
         if(c.action === "microCheck_wrong") return microCheck(false, "Not quite. Re-read the system hints and try again.");
 
-        if(c.action === "microCheck_cns") return microCheck(true, "CNS includes the brain and spinal cord.");
-        if(c.action === "microCheck_pns") return microCheck(true, "PNS connects the CNS to the rest of the body.");
-        if(c.action === "microCheck_somatic") return microCheck(true, "Somatic controls voluntary movement.");
-        if(c.action === "microCheck_sympathetic") return microCheck(true, "Sympathetic prepares the body for action.");
-        if(c.action === "microCheck_parasympathetic") return microCheck(true, "Parasympathetic restores the body after stress.");
+        // --- Module 2 checks ---
+        if(c.action === "microCheck_cns") return microCheck(true, "CNS includes the brain and spinal cord.", "module2_split");
+        if(c.action === "microCheck_pns") return microCheck(true, "PNS connects the CNS to the rest of the body.", "module2_split");
+        if(c.action === "microCheck_somatic") return microCheck(true, "Somatic controls voluntary movement.", "module2_autonomic");
+        if(c.action === "microCheck_sympathetic") return microCheck(true, "Sympathetic prepares the body for action.", "module2_complete");
+        if(c.action === "microCheck_parasympathetic") return microCheck(true, "Parasympathetic restores the body after stress.", "module2_complete");
       }
     );
 
@@ -814,15 +816,17 @@ function continueAfterQuiz(){
   return renderNode("route_clear");
 }
 
-function microCheck(correct, message){
+function microCheck(correct, message, nextNode){
   if(correct){
     logLine(`✔ MICRO-CHECK: ${message}`, "ok");
     setStability(state.save.stability + 2);
-    renderNode("module1_complete");
+
+    // ✅ go where the caller wants (Module 1, Module 2, etc.)
+    if(nextNode) renderNode(nextNode);
   }else{
     logLine(`✖ MICRO-CHECK: ${message}`, "warn");
     setStability(state.save.stability - 2);
-    // Stay on the same node so the player can choose again
+    // Stay on same node
   }
 }
 
@@ -915,4 +919,4 @@ ui.hudScore.textContent = (typeof state.save.lastScore === "number") ? `SCORE ${
 applyMinutes();
 
 logLine("System online. Neuroveil protocol loaded.", "sys");
-renderNode(state.save.node || "boot");
+renderNode(state.save.nodeId || "boot");
