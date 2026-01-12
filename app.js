@@ -261,6 +261,7 @@ const STORY = {
     choices: [
       { label: "START SESSION (Pomodoro + Knowledge Check)", action: "startSession" },
       { label: "5-minute test cycle (fast)", action: "startFast" },
+      { label: "DEBUG: Jump to Module 2", go: "module2_intro" },
     ]
   },
 
@@ -586,7 +587,10 @@ function renderNode(id){
     b.onclick = () => safeRun(
       c.label || c.action || c.go || "choice",
       () => {
-        if(c.go) return renderNode(c.go);
+        if(c.go){
+  logLine(`NAVIGATE → ${c.go}`, "sys");
+  return renderNode(c.go);
+}
 
         if(c.action === "startSession") return startSession(false);
         if(c.action === "startFast") return startSession(true);
