@@ -449,3 +449,17 @@ body[data-stability="low"]{
 .log-glitch{
   animation: logGlitch 650ms linear 1;
 }
+
+/* ===========================
+   UX POLISH (A) — Primary choice button
+   =========================== */
+
+.choiceBtn.primary{
+  border-color: rgba(220, 200, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.08), 0 0 18px rgba(140, 90, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.choiceBtn.primary:hover{
+  box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.12), 0 0 26px rgba(140, 90, 255, 0.24);
+}

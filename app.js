@@ -38,7 +38,7 @@ const ui = {
   submitBtn: $("submitBtn"),
 };
 
-const SAVE_KEY = "neuroveil_phase1_save_v4";
+const SAVE_KEY = "neuroveil_phase1_save_v5";
 
 function loadSave(){
   try{
@@ -1109,14 +1109,32 @@ That is the point.`,
 
 };
 
+function buildMetaLine(id, n){
+  // If you already provide meta in STORY nodes, we keep it and add a breadcrumb prefix.
+  const raw = (n.meta || "").trim();
+
+  // Breadcrumb inference from node id
+  let crumb = "";
+  if(id.startsWith("module1_")) crumb = "Module 1";
+  else if(id.startsWith("module2_")) crumb = "Module 2";
+  else if(id.startsWith("module3_")) crumb = "Module 3";
+  else if(id.startsWith("module4_")) crumb = "Module 4";
+  else if(id === "calibration") crumb = "Calibration";
+  else if(id === "post_quiz") crumb = "After-Action";
+
+  // Clean join
+  if(crumb && raw) return `${crumb} • ${raw}`;
+  if(crumb) return crumb;
+  return raw;
+}
+
 function renderNode(id){
   const n = STORY[id];
 
   if(!n){
     ui.sceneKicker.textContent = "ERROR";
     ui.sceneTitle.textContent = "MISSING NODE";
-    ui.sceneMeta.textContent = "";
-    ui.sceneText.textContent = `Node '${id}' not found.`;
+      ui.sceneMeta.textContent = buildMetaLine(id, n);
     ui.choiceRow.innerHTML = "";
     return;
   }
@@ -1124,6 +1142,7 @@ function renderNode(id){
   // Persist current node (✅ correct key)
   state.save.nodeId = id;
   saveNow();
+    logLine(`NAVIGATE > ${id}`, "sys");
 
   // Render text
   ui.sceneKicker.textContent = n.kicker || "";
@@ -1135,9 +1154,15 @@ function renderNode(id){
   ui.choiceRow.innerHTML = "";
 
   (n.choices || []).forEach((c) => {
-    const b = document.createElement("button");
+        const b = document.createElement("button");
     b.className = "choiceBtn";
     b.textContent = c.label || "Continue";
+
+    // Make "Continue/Proceed" style pop as the primary action
+    const label = (b.textContent || "").toLowerCase();
+    if(label.includes("continue") || label.includes("proceed") || label.includes("enter") || label.includes("start session")){
+      b.classList.add("primary");
+    }
 
     b.onclick = () => safeRun(
       c.label || c.action || c.go || "choice",
