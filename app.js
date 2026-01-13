@@ -547,9 +547,9 @@ A new door unlocks:
 “Chemical Messengers.”
 
 Proceed when ready.`,
-  choices: [
-    { label: "Return to calibration (next Pomodoro)", go: "calibration" }
-  ]
+    choices: [
+  { label: "Enter the Chemical Messengers corridor", go: "module3_intro" }
+]
 },
 
 module3_intro: {
@@ -647,9 +647,9 @@ Calm without engagement erased urgency.
 [YOU] For the first time, the corridor stabilizes—
 not because it is silent…
 but because it is balanced.`,
-  choices: [
-    { label: "Proceed to next focus cycle", go: "calibration" }
-  ]
+    choices: [
+  { label: "Stabilize baseline mood", go: "module4_intro" }
+]
 },
 
 module4_intro: {
@@ -778,6 +778,7 @@ function renderNode(id){
         if(c.action === "microCheck_parasympathetic") return microCheck(true, "Parasympathetic restores the body after stress.", "module2_complete"); 
         if(c.action === "microCheck_dopamine") return microCheck( true, "Excess dopamine increases salience and reward, often at the cost of accuracy.", "module3_balance");
         if(c.action === "microCheck_gaba") return microCheck( true, "GABA reduces neural firing, calming the system but slowing learning.", "module3_balance");
+        if(c.action === "microCheck_serotonin") return microCheck( true, "Low serotonin destabilizes mood, which disrupts motivation and memory over time.", "module4_complete");
       }
     );
 
