@@ -89,6 +89,7 @@ function setStability(v){
   state.save.stability = clamp(v, 0, 100);
   ui.hudStability.textContent = `STABILITY ${pad2(state.save.stability)}`;
   saveNow();
+    setAtmosphereByStability();
 }
 
 function setScore(v){
@@ -135,49 +136,434 @@ function startTimer(){
    - Scaffold list for Chapter 3 terms (you provided a big list)
 ------------------------ */
 const TERM_BANK = [
+  // ---------------------------
+  // CHAPTER 8.2 CORE (keep first)
+  // ---------------------------
   {
     id: "amygdala",
     term: "Amygdala",
     chapter: "8.2",
-    tags: ["memory", "emotion", "fear", "threat"],
-    def: "Threat detection and fear-related processing; flags emotional significance and can strengthen encoding of intense events.",
-    learn: "Amygdala = alarm system. It tags danger/emotion and can boost memory strength.",
+    tags: ["emotion", "fear", "threat"],
+    def: "Brain structure involved in threat detection, fear processing, and emotional significance.",
+    learn: "Amygdala = alarm system. Detects danger and triggers fear/emotion responses.",
+    example: "Your heart races when you hear a sudden loud noise.",
+    apply: "Overactivity → anxiety; damage → reduced fear recognition.",
     consequence: "THREAT RESPONSE SPIKE — the corridor feels hostile; perception shifts toward danger."
   },
   {
     id: "hippocampus",
     term: "Hippocampus",
     chapter: "8.2",
-    tags: ["memory", "encoding", "episodic", "spatial"],
-    def: "Forms new long-term (episodic/spatial) memories; damage often causes difficulty forming new memories (anterograde amnesia).",
-    learn: "Hippocampus = memory librarian. It files new memories; damage → can’t create new files.",
+    tags: ["memory", "encoding", "learning"],
+    def: "Brain structure responsible for forming new long-term episodic and spatial memories.",
+    learn: "Hippocampus = memory librarian. Files new memories into long-term storage.",
+    example: "Remembering where you parked your car today.",
+    apply: "Damage → anterograde amnesia (can’t form new long-term memories).",
     consequence: "MEMORY CORRUPTION — fragments loop; scenes feel repeated and unstable."
   },
 
-  // Chapter 3 scaffold examples (you will expand this list with your full terms)
+  // ---------------------------
+  // CHAPTER 3 — NERVOUS SYSTEM PARTS & FUNCTIONS
+  // ---------------------------
+  {
+    id: "central_nervous_system",
+    term: "Central Nervous System (CNS)",
+    chapter: "3",
+    tags: ["brain", "spinal-cord", "control"],
+    def: "The brain and spinal cord; processes information and coordinates behavior.",
+    learn: "CNS = command center."
+  },
+  {
+    id: "peripheral_nervous_system",
+    term: "Peripheral Nervous System (PNS)",
+    chapter: "3",
+    tags: ["nerves", "communication"],
+    def: "All nerves outside the brain and spinal cord; connects the CNS to the rest of the body.",
+    learn: "PNS = communication lines."
+  },
+  {
+    id: "somatic_nervous_system",
+    term: "Somatic Nervous System",
+    chapter: "3",
+    tags: ["voluntary", "movement"],
+    def: "Division of the PNS that controls voluntary movement of skeletal muscles.",
+    learn: "Somatic = you choose to move."
+  },
+  {
+    id: "autonomic_nervous_system",
+    term: "Autonomic Nervous System",
+    chapter: "3",
+    tags: ["automatic", "organs"],
+    def: "Division of the PNS that controls automatic bodily functions (heart rate, digestion, etc.).",
+    learn: "Autonomic = runs in the background."
+  },
+  {
+    id: "sympathetic_nervous_system",
+    term: "Sympathetic Nervous System",
+    chapter: "3",
+    tags: ["fight-or-flight", "stress"],
+    def: "Branch of the autonomic nervous system that prepares the body for action during stress.",
+    learn: "Sympathetic = fight or flight."
+  },
+  {
+    id: "parasympathetic_nervous_system",
+    term: "Parasympathetic Nervous System",
+    chapter: "3",
+    tags: ["rest-and-digest", "recovery"],
+    def: "Branch of the autonomic nervous system that calms the body and restores energy after stress.",
+    learn: "Parasympathetic = rest and digest."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — NEURON PARTS
+  // ---------------------------
   {
     id: "neuron",
     term: "Neuron",
     chapter: "3",
-    tags: ["cell", "nervous-system"],
-    def: "A nerve cell; the basic unit of the nervous system.",
-    learn: "Neurons communicate via electrical signals (action potentials) and chemical signals (neurotransmitters)."
+    tags: ["cell", "communication"],
+    def: "A specialized nerve cell that transmits information through electrical and chemical signals.",
+    learn: "Neuron = information messenger."
   },
   {
-    id: "action_potential",
-    term: "Action Potential",
+    id: "dendrite",
+    term: "Dendrite",
     chapter: "3",
-    tags: ["electric", "signal"],
-    def: "An electrical signal that travels down the axon of a neuron.",
-    learn: "All-or-none electrical impulse; enables rapid communication."
+    tags: ["neuron", "input"],
+    def: "Branch-like extensions of a neuron that receive incoming signals from other neurons.",
+    learn: "Dendrites receive."
+  },
+  {
+    id: "cell_body",
+    term: "Cell Body",
+    chapter: "3",
+    tags: ["neuron", "integration"],
+    def: "Part of the neuron that contains the nucleus and integrates incoming signals.",
+    learn: "Cell body decides whether to fire."
+  },
+  {
+    id: "axon",
+    term: "Axon",
+    chapter: "3",
+    tags: ["neuron", "output"],
+    def: "Long extension of a neuron that carries electrical impulses away from the cell body.",
+    learn: "Axon sends."
+  },
+  {
+    id: "myelin_sheath",
+    term: "Myelin Sheath",
+    chapter: "3",
+    tags: ["speed", "insulation"],
+    def: "Fatty insulation around an axon that increases the speed of neural transmission.",
+    learn: "Myelin = signal speed booster."
+  },
+  {
+    id: "terminal_button",
+    term: "Terminal Button",
+    chapter: "3",
+    tags: ["release", "neurotransmitter"],
+    def: "End of an axon that releases neurotransmitters into the synapse.",
+    learn: "Terminal buttons release chemicals."
   },
   {
     id: "synapse",
     term: "Synapse",
     chapter: "3",
-    tags: ["communication", "neurotransmitters"],
-    def: "The junction where neurons communicate—typically by neurotransmitters crossing a synaptic gap.",
-    learn: "Synapse = handoff point between neurons."
+    tags: ["gap", "communication"],
+    def: "The junction (gap) between neurons where neurotransmitters cross to pass a signal.",
+    learn: "Synapse = handoff gap."
+  },
+  {
+    id: "receptor",
+    term: "Receptor",
+    chapter: "3",
+    tags: ["binding", "signal"],
+    def: "Protein site that receives neurotransmitters and triggers a response in the receiving cell.",
+    learn: "Receptor = docking station."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — NEURAL PROCESSES
+  // ---------------------------
+  {
+    id: "action_potential",
+    term: "Action Potential",
+    chapter: "3",
+    tags: ["electric", "impulse"],
+    def: "An all-or-none electrical impulse that travels down the axon of a neuron.",
+    learn: "Action potential = the neuron ‘fires’."
+  },
+  {
+    id: "excitatory_signals",
+    term: "Excitatory signals",
+    chapter: "3",
+    tags: ["increase", "firing"],
+    def: "Signals that increase the likelihood that the next neuron will fire.",
+    learn: "Excitatory = pushes toward firing."
+  },
+  {
+    id: "inhibitory_signals",
+    term: "Inhibitory signals",
+    chapter: "3",
+    tags: ["decrease", "firing"],
+    def: "Signals that decrease the likelihood that the next neuron will fire.",
+    learn: "Inhibitory = blocks firing."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — NEUROTRANSMITTERS
+  // ---------------------------
+  {
+    id: "neurotransmitters",
+    term: "Neurotransmitters",
+    chapter: "3",
+    tags: ["chemical", "messengers"],
+    def: "Chemical messengers that cross the synapse to transmit signals between neurons.",
+    learn: "Neurotransmitters = chemical communication."
+  },
+  {
+    id: "acetylcholine",
+    term: "Acetylcholine",
+    chapter: "3",
+    tags: ["movement", "memory"],
+    def: "Neurotransmitter involved in muscle movement, learning, and memory.",
+    learn: "ACh = movement + memory."
+  },
+  {
+    id: "dopamine",
+    term: "Dopamine",
+    chapter: "3",
+    tags: ["reward", "movement"],
+    def: "Neurotransmitter involved in reward, motivation, and movement.",
+    learn: "Dopamine = reward/motivation."
+  },
+  {
+    id: "serotonin",
+    term: "Serotonin",
+    chapter: "3",
+    tags: ["mood", "sleep"],
+    def: "Neurotransmitter involved in mood, sleep, and appetite regulation.",
+    learn: "Serotonin = mood + sleep."
+  },
+  {
+    id: "epinephrine",
+    term: "Epinephrine",
+    chapter: "3",
+    tags: ["arousal", "stress"],
+    def: "Neurotransmitter/hormone involved in arousal and the body’s stress response (adrenaline).",
+    learn: "Epinephrine = adrenaline."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — ENDOCRINE SYSTEM
+  // ---------------------------
+  {
+    id: "endocrine_system",
+    term: "Endocrine system",
+    chapter: "3",
+    tags: ["hormones", "glands"],
+    def: "System of glands that release hormones into the bloodstream to regulate the body.",
+    learn: "Endocrine = hormones in blood."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — BRAIN REGIONS & LOBES
+  // ---------------------------
+  {
+    id: "forebrain",
+    term: "Forebrain",
+    chapter: "3",
+    tags: ["higher-thinking", "emotion"],
+    def: "Largest brain region; includes structures responsible for thinking, emotion, and memory.",
+    learn: "Forebrain = complex cognition + emotion."
+  },
+  {
+    id: "midbrain",
+    term: "Midbrain",
+    chapter: "3",
+    tags: ["movement", "sensory"],
+    def: "Brain region involved in movement and processing auditory/visual information.",
+    learn: "Midbrain = movement + sensory relay."
+  },
+  {
+    id: "hindbrain",
+    term: "Hindbrain",
+    chapter: "3",
+    tags: ["survival", "coordination"],
+    def: "Brain region involved in basic life functions and coordination.",
+    learn: "Hindbrain = survival systems."
+  },
+  {
+    id: "thalamus",
+    term: "Thalamus",
+    chapter: "3",
+    tags: ["relay", "sensory"],
+    def: "Relay station that routes sensory information (except smell) to the cortex.",
+    learn: "Thalamus = sensory switchboard."
+  },
+  {
+    id: "hypothalamus",
+    term: "Hypothalamus",
+    chapter: "3",
+    tags: ["homeostasis", "hormones"],
+    def: "Regulates basic needs (hunger, thirst, temperature) and controls the endocrine system via the pituitary gland.",
+    learn: "Hypothalamus = body balance + hormone control."
+  },
+  {
+    id: "cerebellum",
+    term: "Cerebellum",
+    chapter: "3",
+    tags: ["coordination", "balance"],
+    def: "Brain structure involved in balance, coordination, and fine motor control.",
+    learn: "Cerebellum = smooth movement."
+  },
+  {
+    id: "corpus_callosum",
+    term: "Corpus callosum",
+    chapter: "3",
+    tags: ["hemispheres", "connection"],
+    def: "Thick band of neural fibers connecting the left and right hemispheres of the brain.",
+    learn: "Corpus callosum = bridge between hemispheres."
+  },
+  {
+    id: "frontal_lobe",
+    term: "Frontal lobe",
+    chapter: "3",
+    tags: ["planning", "decision"],
+    def: "Brain lobe involved in decision making, planning, personality, and voluntary movement.",
+    learn: "Frontal = planning/choices."
+  },
+  {
+    id: "parietal_lobe",
+    term: "Parietal Lobe",
+    chapter: "3",
+    tags: ["touch", "spatial"],
+    def: "Brain lobe involved in processing touch and spatial awareness.",
+    learn: "Parietal = touch + space."
+  },
+  {
+    id: "temporal_lobe",
+    term: "Temporal lobe",
+    chapter: "3",
+    tags: ["hearing", "language"],
+    def: "Brain lobe involved in auditory processing and language comprehension.",
+    learn: "Temporal = hearing + language."
+  },
+  {
+    id: "occipital_lobe",
+    term: "Occipital lobe",
+    chapter: "3",
+    tags: ["vision"],
+    def: "Brain lobe responsible for visual processing.",
+    learn: "Occipital = vision."
+  },
+  {
+    id: "somatosensory_cortex",
+    term: "Somatosensory cortex",
+    chapter: "3",
+    tags: ["touch", "body-map"],
+    def: "Area of the parietal lobe that processes touch sensations from the body.",
+    learn: "Somatosensory cortex = touch map."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — BRAIN IMAGING
+  // ---------------------------
+  {
+    id: "eeg",
+    term: "Electroencephalograph (EEG)",
+    chapter: "3",
+    tags: ["brainwaves", "electric"],
+    def: "Technique that records the brain’s electrical activity using electrodes on the scalp.",
+    learn: "EEG = electrical activity."
+  },
+  {
+    id: "fmri",
+    term: "Functional magnetic resonance imaging (FMRI)",
+    chapter: "3",
+    tags: ["blood-flow", "activity"],
+    def: "Imaging technique that measures brain activity by detecting changes in blood flow.",
+    learn: "fMRI = blood flow activity map."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — GENETICS / DEVELOPMENT
+  // ---------------------------
+  {
+    id: "nature",
+    term: "Nature",
+    chapter: "3",
+    tags: ["genes", "biology"],
+    def: "Influences on behavior and traits that come from genetic inheritance.",
+    learn: "Nature = genes."
+  },
+  {
+    id: "nurture",
+    term: "Nurture",
+    chapter: "3",
+    tags: ["environment", "experience"],
+    def: "Influences on behavior and traits that come from environment and experience.",
+    learn: "Nurture = environment."
+  },
+  {
+    id: "genotype",
+    term: "Genotype",
+    chapter: "3",
+    tags: ["genes", "dna"],
+    def: "A person’s genetic makeup (the genes they carry).",
+    learn: "Genotype = genetic code."
+  },
+  {
+    id: "phenotype",
+    term: "Phenotype",
+    chapter: "3",
+    tags: ["traits", "expression"],
+    def: "Observable traits that result from the interaction of genotype and environment.",
+    learn: "Phenotype = what you see."
+  },
+  {
+    id: "mono_twin",
+    term: "Monozygotic twins",
+    chapter: "3",
+    tags: ["identical", "genetics"],
+    def: "Identical twins; develop from a single fertilized egg that splits.",
+    learn: "Monozygotic = identical genetics."
+  },
+  {
+    id: "di_twin",
+    term: "Dizygotic twins",
+    chapter: "3",
+    tags: ["fraternal", "genetics"],
+    def: "Fraternal twins; develop from two different fertilized eggs.",
+    learn: "Dizygotic = like regular siblings."
+  },
+
+  // ---------------------------
+  // CHAPTER 3 — PLASTICITY / DEVELOPMENT TERMS
+  // ---------------------------
+  {
+    id: "plasticity",
+    term: "Plasticity",
+    chapter: "3",
+    tags: ["change", "adaptation"],
+    def: "The brain’s ability to change and adapt in response to experience.",
+    learn: "Plasticity = the brain can rewire."
+  },
+  {
+    id: "neural_pruning",
+    term: "Neural pruning",
+    chapter: "3",
+    tags: ["development", "connections"],
+    def: "The process of eliminating unused neural connections and strengthening frequently used ones.",
+    learn: "Pruning = cut weak links, strengthen strong ones."
+  },
+  {
+    id: "neurogenesis",
+    term: "Neurogenesis",
+    chapter: "3",
+    tags: ["growth", "new-neurons"],
+    def: "The creation of new neurons in the brain.",
+    learn: "Neurogenesis = new neurons form (especially in hippocampus)."
   }
 ];
 
@@ -968,7 +1354,10 @@ function finishQuiz(){
   state.save.missed.forEach((conceptName) => {
     const t = getTermByConceptName(conceptName);
     if(t && t.consequence){
-      logLine(`⚠ ${t.term.toUpperCase()} CONSEQUENCE: ${t.consequence}`, "warn");
+      logLine(`⚠ ${t.term.toUpperCase()} CONSEQUENCE: ${t.consequence}`, "warn");   
+      // Atmosphere reaction
+    if(state.save.missed.includes("Amygdala")) pulseVeil();
+    if(state.save.missed.includes("Hippocampus")) glitchLog();
     }
   });
 
@@ -1083,6 +1472,28 @@ ui.resetBtn.onclick = () => {
 
 ui.minutesSelect.onchange = () => applyMinutes();
 ui.submitBtn.onclick = () => submitQuiz();
+
+function setAtmosphereByStability(){
+  // "low" = more vignette/fog
+  if(state.save.stability < 40){
+    document.body.dataset.stability = "low";
+  }else{
+    document.body.dataset.stability = "ok";
+  }
+}
+
+function pulseVeil(){
+  document.body.classList.remove("veil-pulse");
+  // force reflow so animation can retrigger
+  void document.body.offsetWidth;
+  document.body.classList.add("veil-pulse");
+}
+
+function glitchLog(){
+  ui.logBox.classList.remove("log-glitch");
+  void ui.logBox.offsetWidth;
+  ui.logBox.classList.add("log-glitch");
+}
 
 /* -----------------------
    Boot

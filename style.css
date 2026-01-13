@@ -368,3 +368,84 @@ body{
 @media (max-width: 980px){
   .layout{ grid-template-columns: 1fr; }
 }
+
+/* ===========================
+   NEUROVEIL • Atmosphere Layer (B)
+   Uneasy / Surreal polish
+   =========================== */
+
+:root{
+  --veil-vignette: 0.55;
+  --veil-fog: 0.16;
+  --veil-scan: 0.06;
+  --veil-glow: 0.20;
+}
+
+/* Subtle overlays */
+body::before,
+body::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Fog + vignette */
+body::before{
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.04), rgba(0,0,0,0) 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 20%, rgba(0,0,0,var(--veil-vignette)) 78%),
+    linear-gradient(180deg, rgba(120,90,200,0.08), rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.08));
+  mix-blend-mode: screen;
+}
+
+/* Scanlines */
+body::after{
+  opacity: var(--veil-scan);
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 1px,
+    rgba(0,0,0,0) 3px,
+    rgba(0,0,0,0) 6px
+  );
+  mix-blend-mode: overlay;
+}
+
+/* Keep your app above overlays */
+#app, .appShell, .container, main{
+  position: relative;
+  z-index: 1;
+}
+
+/* A gentle “pulse” when threat/memory consequences hit */
+@keyframes veilPulse{
+  0%{ filter: none; }
+  30%{ filter: saturate(1.15) contrast(1.08); }
+  100%{ filter: none; }
+}
+.veil-pulse{
+  animation: veilPulse 900ms ease-out 1;
+}
+
+/* Low-stability intensifies the vignette slightly */
+body[data-stability="low"]{
+  --veil-vignette: 0.72;
+  --veil-fog: 0.22;
+  --veil-scan: 0.08;
+}
+
+/* Tiny glitch on logs (only when triggered) */
+@keyframes logGlitch{
+  0%{ transform: translateX(0); filter:none; }
+  20%{ transform: translateX(-1px); filter: contrast(1.05); }
+  40%{ transform: translateX(1px); filter: saturate(1.15); }
+  60%{ transform: translateX(-1px); }
+  80%{ transform: translateX(1px); }
+  100%{ transform: translateX(0); filter:none; }
+}
+.log-glitch{
+  animation: logGlitch 650ms linear 1;
+}
