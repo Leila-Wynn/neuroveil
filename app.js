@@ -552,6 +552,175 @@ Proceed when ready.`,
   ]
 },
 
+module3_intro: {
+  kicker: "CHAPTER 3 • MODULE 3",
+  title: "CHEMICAL MESSENGERS",
+  meta: "Neurotransmission • Balance is unstable",
+  text:
+`[SYSTEM] The corridor no longer holds its shape.
+Walls breathe. Light pulses out of sync.
+
+[YOU] The air feels thick—charged, uncertain.
+Thoughts arrive too quickly… or not at all.
+
+[SYSTEM] “Electrical signals are not enough.”
+[SYSTEM] “Chemistry now determines meaning.”
+
+Two chambers drift into view.
+Both feel wrong in different ways.`,
+  choices: [
+    { label: "Enter the chamber of reward and pull", go: "module3_dopamine" },
+    { label: "Enter the chamber of silence and restraint", go: "module3_gaba" }
+  ]
+},
+
+module3_dopamine: {
+  kicker: "MODULE 3 • DOPAMINE",
+  title: "THE REWARD DISTORTION",
+  meta: "Motivation • Salience • Anticipation",
+  text:
+`[YOU] The chamber glows too brightly.
+Every surface promises importance.
+
+[SYSTEM] “Dopamine increases motivation.”
+[SYSTEM] “It signals what matters.”
+
+[YOU] Everything feels urgent.
+Every answer feels almost right.
+
+A prompt flickers—seductive, confident:
+“What happens when dopamine is too high?”`,
+  choices: [
+    {
+      label: "Focus narrows; reward outweighs accuracy",
+      action: "microCheck_dopamine",
+    },
+    {
+      label: "Memory formation becomes precise and stable",
+      action: "microCheck_wrong",
+    }
+  ]
+},
+
+module3_gaba: {
+  kicker: "MODULE 3 • GABA",
+  title: "THE SILENCING FIELD",
+  meta: "Inhibition • Calm • Control",
+  text:
+`[YOU] Sound collapses into a dull hum.
+Movement feels optional.
+
+[SYSTEM] “GABA inhibits neural activity.”
+[SYSTEM] “It prevents overload.”
+
+[YOU] The noise fades—but so does urgency.
+Thoughts slow. Maybe too much.
+
+A muted prompt surfaces:
+“What happens when inhibition dominates?”`,
+  choices: [
+    {
+      label: "Calm increases, but learning slows",
+      action: "microCheck_gaba",
+    },
+    {
+      label: "Arousal and motivation intensify",
+      action: "microCheck_wrong",
+    }
+  ]
+},
+
+module3_balance: {
+  kicker: "MODULE 3 • BALANCE",
+  title: "CHEMICAL EQUILIBRIUM",
+  meta: "Emotion × Memory",
+  text:
+`[SYSTEM] The chambers dissolve.
+Their effects linger.
+
+[YOU] Motivation without restraint distorted memory.
+Calm without engagement erased urgency.
+
+[SYSTEM] “Emotion shapes chemistry.”
+[SYSTEM] “Chemistry shapes memory.”
+
+[YOU] For the first time, the corridor stabilizes—
+not because it is silent…
+but because it is balanced.`,
+  choices: [
+    { label: "Proceed to next focus cycle", go: "calibration" }
+  ]
+},
+
+module4_intro: {
+  kicker: "CHAPTER 8.2 • MODULE 4",
+  title: "BASELINE STATE",
+  meta: "Mood • Regulation • Continuity",
+  text:
+`[SYSTEM] The corridor does not distort.
+It simply… persists.
+
+[YOU] Nothing feels urgent.
+Nothing feels wrong.
+
+[SYSTEM] “Serotonin governs baseline mood.”
+[SYSTEM] “It does not excite. It does not inhibit.”
+[SYSTEM] “It stabilizes.”
+
+[YOU] This is the state most learning happens in—
+quietly shaped, rarely noticed.`,
+  choices: [
+    { label: "Enter the baseline chamber", go: "module4_serotonin" }
+  ]
+},
+
+module4_serotonin: {
+  kicker: "MODULE 4 • SEROTONIN",
+  title: "THE QUIET DRIFT",
+  meta: "Mood regulation • Emotional tone",
+  text:
+`[YOU] The chamber feels neutral—almost too neutral.
+Thoughts arrive without resistance.
+They also leave without impact.
+
+[SYSTEM] “Serotonin stabilizes mood over time.”
+[SYSTEM] “When balanced, learning feels unremarkable—but steady.”
+
+A final prompt surfaces, subtle but important:
+“What happens when serotonin is too low?”`,
+  choices: [
+    {
+      label: "Mood destabilizes, affecting memory and motivation",
+      action: "microCheck_serotonin"
+    },
+    {
+      label: "Learning accelerates dramatically",
+      action: "microCheck_wrong"
+    }
+  ]
+},
+
+module4_complete: {
+  kicker: "MODULE COMPLETE",
+  title: "EMOTIONAL CONTINUITY RESTORED",
+  meta: "Chapter 8.2 integrated",
+  text:
+`[SYSTEM] Baseline restored.
+[YOU] Memory no longer spikes or collapses—it flows.
+
+Emotion no longer hijacks learning.
+Nor does it disappear.
+
+[SYSTEM] “Emotion does not oppose memory.”
+[SYSTEM] “It defines its texture.”
+
+The corridor does not demand your attention anymore.
+That is the point.`,
+  choices: [
+    { label: "Return to calibration", go: "calibration" }
+  ]
+},
+
 };
 
 function renderNode(id){
@@ -606,7 +775,9 @@ function renderNode(id){
         if(c.action === "microCheck_pns") return microCheck(true, "PNS connects the CNS to the rest of the body.", "module2_split");
         if(c.action === "microCheck_somatic") return microCheck(true, "Somatic controls voluntary movement.", "module2_autonomic");
         if(c.action === "microCheck_sympathetic") return microCheck(true, "Sympathetic prepares the body for action.", "module2_complete");
-        if(c.action === "microCheck_parasympathetic") return microCheck(true, "Parasympathetic restores the body after stress.", "module2_complete");
+        if(c.action === "microCheck_parasympathetic") return microCheck(true, "Parasympathetic restores the body after stress.", "module2_complete"); 
+        if(c.action === "microCheck_dopamine") return microCheck( true, "Excess dopamine increases salience and reward, often at the cost of accuracy.", "module3_balance");
+        if(c.action === "microCheck_gaba") return microCheck( true, "GABA reduces neural firing, calming the system but slowing learning.", "module3_balance");
       }
     );
 
