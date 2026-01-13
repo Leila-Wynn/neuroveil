@@ -38,7 +38,7 @@ const ui = {
   submitBtn: $("submitBtn"),
 };
 
-const SAVE_KEY = "neuroveil_phase1_save_v2";
+const SAVE_KEY = "neuroveil_phase1_save_v3";
 
 function loadSave(){
   try{
