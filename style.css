@@ -463,3 +463,25 @@ body[data-stability="low"]{
 .choiceBtn.primary:hover{
   box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.12), 0 0 26px rgba(140, 90, 255, 0.24);
 }
+
+/* ===========================
+   TERM BANK • Active Recall (Option 2)
+   =========================== */
+
+.termCard .termDef,
+.termCard .termExtra{
+  display: none;
+}
+
+.termCard.revealed .termDef,
+.termCard.revealed .termExtra{
+  display: block;
+}
+
+.termCard .termHint{
+  opacity: 0.75;
+}
+
+.termCard.revealed .termHint{
+  opacity: 0.95;
+}

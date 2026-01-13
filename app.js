@@ -38,7 +38,7 @@ const ui = {
   submitBtn: $("submitBtn"),
 };
 
-const SAVE_KEY = "neuroveil_phase1_save_v5";
+const SAVE_KEY = "neuroveil_phase1_save_v6";
 
 function loadSave(){
   try{
@@ -570,21 +570,35 @@ const TERM_BANK = [
 
 function renderTerms(){
   ui.termList.innerHTML = "";
+
   TERM_BANK.forEach((t) => {
     const card = document.createElement("div");
     card.className = "termCard";
 
+    // Active recall: hide definition until revealed
     card.innerHTML = `
       <div class="termName">${t.term}</div>
-      <div class="termDef">${t.def}</div>
-      <div class="termHint">Click to expand</div>
+      <div class="termHint">Active Recall: click to reveal • click again to hide</div>
+
+      <div class="termDef"><b>Definition:</b> ${t.def || ""}</div>
+
+      <div class="termExtra">
+        ${t.learn ? `<div><b>Learn:</b> ${t.learn}</div>` : ``}
+        ${t.example ? `<div><b>Example:</b> ${t.example}</div>` : ``}
+        ${t.apply ? `<div><b>Apply:</b> ${t.apply}</div>` : ``}
+        ${t.consequence ? `<div><b>Consequence (if missed):</b> ${t.consequence}</div>` : ``}
+        ${t.chapter ? `<div><b>Chapter:</b> ${t.chapter}</div>` : ``}
+      </div>
     `;
 
     card.onclick = () => {
-      logLine(`TERM LOADED: ${t.term}`, "sys");
-      logLine(`↳ ${t.learn || t.def}`, "sys");
-      if(t.consequence){
-        logLine(`↳ Narrative consequence (if missed): ${t.consequence}`, "warn");
+      const nowRevealed = !card.classList.contains("revealed");
+      card.classList.toggle("revealed");
+
+      if(nowRevealed){
+        logLine(`TERM REVEALED: ${t.term}`, "sys");
+      }else{
+        logLine(`TERM HIDDEN: ${t.term}`, "sys");
       }
     };
 
